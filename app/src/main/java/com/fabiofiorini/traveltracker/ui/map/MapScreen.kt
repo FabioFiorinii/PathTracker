@@ -12,34 +12,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.fabiofiorini.traveltracker.data.*
 import com.google.android.gms.location.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import java.util.*
+import org.osmdroid.views.overlay.Polyline
 
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(
     onStop: () -> Unit
 ) {
-
     val context = LocalContext.current
     val db = remember { DatabaseProvider.getDatabase(context) }
-
     val scope = rememberCoroutineScope()
 
     var seconds by remember { mutableStateOf(0) }
     var distanceKm by remember { mutableStateOf(0.0) }
 
     var lastLocation by remember { mutableStateOf<Location?>(null) }
-    val points = remember { mutableStateListOf<Location>() }
 
-    var isTracking by remember { mutableStateOf(true) }
-    var showDialog by remember { mutableStateOf(false) }
+    val points = remember {
+        mutableStateListOf<Location>()
+    }
 
-    // TIMER
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var isTracking by remember {
+        mutableStateOf(true)
+    }
+
     LaunchedEffect(isTracking) {
         while (isTracking) {
             delay(1000)
@@ -47,10 +55,13 @@ fun MapScreen(
         }
     }
 
-    fun formatTime(sec: Int): String {
-        val m = sec / 60
-        val s = sec % 60
-        return "%02d:%02d".format(m, s)
+    fun averageSpeed(): Double {
+
+        val hours = seconds / 3600.0
+
+        if (hours <= 0.0) return 0.0
+
+        return distanceKm / hours
     }
 
     fun saveRoute(title: String) {
@@ -61,11 +72,12 @@ fun MapScreen(
                     title = title,
                     distanceKm = distanceKm,
                     durationSec = seconds,
+                    averageSpeedKmh = averageSpeed(),
                     date = System.currentTimeMillis()
                 )
             )
 
-            val pointEntities = points.map {
+            val routePoints = points.map {
                 RoutePointEntity(
                     routeId = routeId,
                     lat = it.latitude,
@@ -74,7 +86,7 @@ fun MapScreen(
                 )
             }
 
-            db.routeDao().insertPoints(pointEntities)
+            db.routeDao().insertPoints(routePoints)
 
             withContext(Dispatchers.Main) {
                 onStop()
@@ -87,46 +99,67 @@ fun MapScreen(
         AndroidView(factory = { ctx ->
 
             val map = MapView(ctx)
+
             map.setTileSource(TileSourceFactory.MAPNIK)
             map.setMultiTouchControls(true)
             map.controller.setZoom(18.0)
 
-            val fusedClient = LocationServices.getFusedLocationProviderClient(ctx)
+            val fusedClient = LocationServices
+                .getFusedLocationProviderClient(ctx)
 
             val marker = Marker(map)
             map.overlays.add(marker)
 
+            val polyline = Polyline()
+            map.overlays.add(polyline)
+
             val request = LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
-                2000
+                5000
             ).build()
 
             val callback = object : LocationCallback() {
+
                 override fun onLocationResult(result: LocationResult) {
+
                     if (!isTracking) return
 
-                    val loc = result.lastLocation ?: return
-                    val point = GeoPoint(loc.latitude, loc.longitude)
+                    val location = result.lastLocation ?: return
+
+                    val point = GeoPoint(
+                        location.latitude,
+                        location.longitude
+                    )
 
                     marker.position = point
+
+                    points.add(location)
+
+                    polyline.setPoints(
+                        points.map {
+                            GeoPoint(it.latitude, it.longitude)
+                        }
+                    )
+
                     map.controller.setCenter(point)
                     map.invalidate()
 
-                    // salva punti
-                    points.add(loc)
-
-                    // distanza
                     lastLocation?.let { prev ->
+
                         val res = FloatArray(1)
+
                         Location.distanceBetween(
-                            prev.latitude, prev.longitude,
-                            loc.latitude, loc.longitude,
+                            prev.latitude,
+                            prev.longitude,
+                            location.latitude,
+                            location.longitude,
                             res
                         )
+
                         distanceKm += res[0] / 1000.0
                     }
 
-                    lastLocation = loc
+                            lastLocation = location
                 }
             }
 
@@ -139,7 +172,6 @@ fun MapScreen(
             map
         })
 
-        // HUD
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,14 +180,27 @@ fun MapScreen(
         ) {
 
             Card {
-                Column(Modifier.padding(12.dp)) {
-                    Text("Tempo: ${formatTime(seconds)}")
-                    Text("Distanza: %.2f km".format(distanceKm))
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+
+                    Text(
+                        "Tempo: %02d:%02d"
+                            .format(seconds / 60, seconds % 60)
+                    )
+
+                    Text(
+                        "Distanza: %.2f km"
+                            .format(distanceKm)
+                    )
+
+                    Text(
+                        "Velocità media: %.2f km/h"
+                            .format(averageSpeed())
+                    )
                 }
             }
         }
-
-        // STOP
         Button(
             onClick = {
                 isTracking = false
@@ -169,19 +214,26 @@ fun MapScreen(
         }
     }
 
-    // 📌 POPUP TITOLO
     if (showDialog) {
 
-        var title by remember { mutableStateOf("") }
+        var title by remember {
+            mutableStateOf("")
+        }
 
         AlertDialog(
             onDismissRequest = {},
-            title = { Text("Nome percorso") },
+            title = {
+                Text("Titolo percorso")
+            },
             text = {
                 TextField(
                     value = title,
-                    onValueChange = { title = it },
-                    placeholder = { Text("es. Corsa al parco") }
+                    onValueChange = {
+                        title = it
+                    },
+                    placeholder = {
+                        Text("es. Giro lago")
+                    }
                 )
             },
             confirmButton = {

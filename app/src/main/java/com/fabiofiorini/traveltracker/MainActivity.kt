@@ -4,8 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.fabiofiorini.traveltracker.ui.map.MapScreen
+import com.fabiofiorini.traveltracker.ui.history.HistoryScreen
 import com.fabiofiorini.traveltracker.ui.start.StartScreen
 import org.osmdroid.config.Configuration
 
@@ -37,7 +40,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("map")
                             },
                             onHistory = {
-                                // per ora non fa nulla
+                                navController.navigate("history")
                             }
                         )
                     }
@@ -45,6 +48,32 @@ class MainActivity : ComponentActivity() {
                     composable("map") {
                         MapScreen(
                             onStop = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+
+                    composable("history") {
+                        HistoryScreen(
+                            onBack = {
+                                navController.popBackStack()
+                            }
+                        )
+                    }
+                    composable(
+                        "routeMap/{routeId}",
+                        arguments = listOf(
+                            navArgument("routeId") {
+                                type = NavType.LongType
+                            }
+                        )
+                    ) {
+
+                        val routeId = it.arguments?.getLong("routeId") ?: 0L
+
+                        RouteMapScreen(
+                            routeId = routeId,
+                            onClose = {
                                 navController.popBackStack()
                             }
                         )

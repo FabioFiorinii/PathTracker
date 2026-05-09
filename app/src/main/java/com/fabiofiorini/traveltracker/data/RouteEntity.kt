@@ -11,5 +11,6 @@ data class RouteEntity(
     val title: String,
     val distanceKm: Double,
     val durationSec: Int,
+    val averageSpeedKmh: Double,
     val date: Long
 )
