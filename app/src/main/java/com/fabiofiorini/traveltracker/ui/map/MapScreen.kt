@@ -3,6 +3,9 @@ package com.fabiofiorini.traveltracker.ui.map
 import android.annotation.SuppressLint
 import android.location.Location
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -10,12 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.fabiofiorini.traveltracker.data.*
+import com.fabiofiorini.traveltracker.data.DatabaseProvider
+import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.google.android.gms.location.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -23,230 +28,230 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
 @SuppressLint("MissingPermission")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(
-    onStop: () -> Unit
-) {
+fun MapScreen(onStop: () -> Unit) {
+
     val context = LocalContext.current
     val db = remember { DatabaseProvider.getDatabase(context) }
     val scope = rememberCoroutineScope()
 
-    var seconds by remember { mutableStateOf(0) }
-    var distanceKm by remember { mutableStateOf(0.0) }
+    // IMPORTANTISSIMO: evita mappa bianca
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().userAgentValue = context.packageName
+    }
+
+    var mapView by remember { mutableStateOf<MapView?>(null) }
+
+    var currentPoint by remember { mutableStateOf<GeoPoint?>(null) }
+
+    var elapsedSeconds by remember { mutableStateOf(0L) }
+    var distanceMeters by remember { mutableStateOf(0f) }
+
+    var showDialog by remember { mutableStateOf(false) }
+    var routeTitle by remember { mutableStateOf("") }
+
+    val routePoints = remember { mutableStateListOf<GeoPoint>() }
 
     var lastLocation by remember { mutableStateOf<Location?>(null) }
 
-    val points = remember {
-        mutableStateListOf<Location>()
-    }
-
-    var showDialog by remember {
-        mutableStateOf(false)
-    }
-
-    var isTracking by remember {
-        mutableStateOf(true)
-    }
-
-    LaunchedEffect(isTracking) {
-        while (isTracking) {
+    val smoothPoints = remember { mutableListOf<GeoPoint>() }
+    // timer
+    LaunchedEffect(Unit) {
+        while (true) {
             delay(1000)
-            seconds++
-        }
-    }
-
-    fun averageSpeed(): Double {
-
-        val hours = seconds / 3600.0
-
-        if (hours <= 0.0) return 0.0
-
-        return distanceKm / hours
-    }
-
-    fun saveRoute(title: String) {
-        scope.launch(Dispatchers.IO) {
-
-            val routeId = db.routeDao().insertRoute(
-                RouteEntity(
-                    title = title,
-                    distanceKm = distanceKm,
-                    durationSec = seconds,
-                    averageSpeedKmh = averageSpeed(),
-                    date = System.currentTimeMillis()
-                )
-            )
-
-            val routePoints = points.map {
-                RoutePointEntity(
-                    routeId = routeId,
-                    lat = it.latitude,
-                    lon = it.longitude,
-                    timestamp = System.currentTimeMillis()
-                )
-            }
-
-            db.routeDao().insertPoints(routePoints)
-
-            withContext(Dispatchers.Main) {
-                onStop()
-            }
+            elapsedSeconds++
         }
     }
 
     Box(Modifier.fillMaxSize()) {
 
-        AndroidView(factory = { ctx ->
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { ctx ->
 
-            val map = MapView(ctx)
+                val map = MapView(ctx)
 
-            map.setTileSource(TileSourceFactory.MAPNIK)
-            map.setMultiTouchControls(true)
-            map.controller.setZoom(18.0)
+                map.onResume()
+                map.controller.setCenter(GeoPoint(0.0, 0.0))
+                map.setTileSource(TileSourceFactory.MAPNIK)
+                map.setMultiTouchControls(true)
+                map.controller.setZoom(18.0)
 
-            val fusedClient = LocationServices
-                .getFusedLocationProviderClient(ctx)
+                val marker = Marker(map)
+                marker.title = "Tu sei qui"
+                map.overlays.add(marker)
 
-            val marker = Marker(map)
-            map.overlays.add(marker)
+                val polyline = Polyline()
+                polyline.setColor( android.graphics.Color.RED)
+                polyline.setWidth(100f)
+                map.overlays.add(polyline)
 
-            val polyline = Polyline()
-            map.overlays.add(polyline)
+                val fusedClient =
+                    LocationServices.getFusedLocationProviderClient(ctx)
 
-            val request = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                5000
-            ).build()
+                val request = LocationRequest.Builder(
+                    Priority.PRIORITY_HIGH_ACCURACY,
+                    5000
+                ).build()
 
-            val callback = object : LocationCallback() {
+                val callback = object : LocationCallback() {
 
-                override fun onLocationResult(result: LocationResult) {
+                    override fun onLocationResult(result: LocationResult) {
 
-                    if (!isTracking) return
+                        val location = result.lastLocation ?: return
 
-                    val location = result.lastLocation ?: return
+                        val newPoint = GeoPoint(location.latitude, location.longitude)
 
-                    val point = GeoPoint(
-                        location.latitude,
-                        location.longitude
-                    )
+                        smoothPoints.add(newPoint)
 
-                    marker.position = point
-
-                    points.add(location)
-
-                    polyline.setPoints(
-                        points.map {
-                            GeoPoint(it.latitude, it.longitude)
+// mantieni solo ultimi 5 punti
+                        if (smoothPoints.size > 5) {
+                            smoothPoints.removeAt(0)
                         }
-                    )
 
-                    map.controller.setCenter(point)
-                    map.invalidate()
+// media semplice
+                        val avgLat = smoothPoints.map { it.latitude }.average()
+                        val avgLon = smoothPoints.map { it.longitude }.average()
 
-                    lastLocation?.let { prev ->
+                        val smoothPoint = GeoPoint(avgLat, avgLon)
 
-                        val res = FloatArray(1)
+                        currentPoint = smoothPoint
+                        marker.position = smoothPoint
+                        routePoints.add(smoothPoint)
 
-                        Location.distanceBetween(
-                            prev.latitude,
-                            prev.longitude,
-                            location.latitude,
-                            location.longitude,
-                            res
-                        )
+                        if (lastLocation != null) {
+                            distanceMeters += lastLocation!!.distanceTo(location)
+                        }
+                        lastLocation = location
 
-                        distanceKm += res[0] / 1000.0
+                        // SAFE UI THREAD UPDATE
+                        map.post {
+                            polyline.setPoints(routePoints)
+                            map.invalidate()
+                        }
                     }
-
-                            lastLocation = location
                 }
-            }
 
-            fusedClient.requestLocationUpdates(
-                request,
-                callback,
-                ctx.mainLooper
-            )
-
-            map
-        })
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            Card {
-                Column(
-                    modifier = Modifier.padding(12.dp)
-                ) {
-
-                    Text(
-                        "Tempo: %02d:%02d"
-                            .format(seconds / 60, seconds % 60)
-                    )
-
-                    Text(
-                        "Distanza: %.2f km"
-                            .format(distanceKm)
-                    )
-
-                    Text(
-                        "Velocità media: %.2f km/h"
-                            .format(averageSpeed())
-                    )
-                }
-            }
-        }
-        Button(
-            onClick = {
-                isTracking = false
-                showDialog = true
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(20.dp)
-        ) {
-            Text("STOP")
-        }
-    }
-
-    if (showDialog) {
-
-        var title by remember {
-            mutableStateOf("")
-        }
-
-        AlertDialog(
-            onDismissRequest = {},
-            title = {
-                Text("Titolo percorso")
-            },
-            text = {
-                TextField(
-                    value = title,
-                    onValueChange = {
-                        title = it
-                    },
-                    placeholder = {
-                        Text("es. Giro lago")
-                    }
+                fusedClient.requestLocationUpdates(
+                    request,
+                    callback,
+                    ctx.mainLooper
                 )
+
+                mapView = map
+                map
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (title.isNotBlank()) {
-                            saveRoute(title)
-                        }
-                    }
-                ) {
-                    Text("Salva")
-                }
+            update = { map ->
+                map.invalidate()
             }
         )
+
+        // INFO BOX
+        Card(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(16.dp)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text(
+                    "Tempo: ${
+                        "%02d:%02d:%02d".format(
+                            elapsedSeconds / 3600,
+                            (elapsedSeconds % 3600) / 60,
+                            elapsedSeconds % 60
+                        )
+                    }"
+                )
+
+                Text("Distanza: %.2f km".format(distanceMeters / 1000f))
+            }
+        }
+
+        // CENTRA MAPPA (manuale)
+        FloatingActionButton(
+            onClick = {
+                currentPoint?.let {
+                    mapView?.controller?.animateTo(it)
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.MyLocation, null)
+        }
+
+        // STOP
+        FloatingActionButton(
+            onClick = { showDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Stop, null)
+        }
+
+        if (showDialog) {
+
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = {
+
+                    Button(onClick = {
+
+                        scope.launch {
+
+                            val avgSpeed =
+                                if (elapsedSeconds > 0)
+                                    (distanceMeters / 1000f) / (elapsedSeconds / 3600f)
+                                else 0f
+
+                            val routeId = withContext(Dispatchers.IO) {
+                                db.routeDao().insertRoute(
+                                    RouteEntity(
+                                        title = routeTitle,
+                                        date = System.currentTimeMillis(),
+                                        durationSec = elapsedSeconds,
+                                        distanceKm = distanceMeters / 1000f,
+                                        averageSpeedKmh = avgSpeed
+                                    )
+                                )
+                            }
+
+                            withContext(Dispatchers.IO) {
+                                db.routeDao().insertPoints(
+                                    routePoints.map {
+                                        com.fabiofiorini.traveltracker.data.RoutePointEntity(
+                                            routeId = routeId,
+                                            lat = it.latitude,
+                                            lon = it.longitude,
+                                            timestamp = System.currentTimeMillis()
+                                        )
+                                    }
+                                )
+                            }
+
+                            onStop()
+                        }
+                    }) {
+                        Text("Salva")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { showDialog = false }) {
+                        Text("Annulla")
+                    }
+                },
+                title = { Text("Salva percorso") },
+                text = {
+                    OutlinedTextField(
+                        value = routeTitle,
+                        onValueChange = { routeTitle = it },
+                        label = { Text("Titolo") }
+                    )
+                }
+            )
+        }
     }
 }

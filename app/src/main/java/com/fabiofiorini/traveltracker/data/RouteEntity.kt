@@ -9,8 +9,8 @@ data class RouteEntity(
     val id: Long = 0,
 
     val title: String,
-    val distanceKm: Double,
-    val durationSec: Int,
-    val averageSpeedKmh: Double,
+    val distanceKm: Float,
+    val durationSec: Long,
+    val averageSpeedKmh: Float,
     val date: Long
 )

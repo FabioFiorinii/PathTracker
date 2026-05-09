@@ -9,6 +9,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.fabiofiorini.traveltracker.ui.map.MapScreen
 import com.fabiofiorini.traveltracker.ui.history.HistoryScreen
+import com.fabiofiorini.traveltracker.ui.history.RouteMapScreen
 import com.fabiofiorini.traveltracker.ui.start.StartScreen
 import org.osmdroid.config.Configuration
 
@@ -57,9 +58,11 @@ class MainActivity : ComponentActivity() {
                         HistoryScreen(
                             onBack = {
                                 navController.popBackStack()
-                            }
+                            },
+                            navController = navController
                         )
                     }
+
                     composable(
                         "routeMap/{routeId}",
                         arguments = listOf(
