@@ -83,8 +83,7 @@ fun MapScreen(onStop: () -> Unit) {
                 map.overlays.add(marker)
 
                 val polyline = Polyline()
-                polyline.setColor( android.graphics.Color.RED)
-                polyline.setWidth(100f)
+                polyline.setColor(android.graphics.Color.RED)
                 map.overlays.add(polyline)
 
                 val fusedClient =
