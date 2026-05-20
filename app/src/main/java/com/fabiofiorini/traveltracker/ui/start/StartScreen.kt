@@ -1,5 +1,6 @@
 package com.fabiofiorini.traveltracker.ui.start
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -7,11 +8,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StartScreen(
     onStartTracking: () -> Unit,
     onHistory: () -> Unit
 ) {
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Travel tracker app")
+                }
+            )
+        }
+    ) {}
 
     Box(
         modifier = Modifier.fillMaxSize(),

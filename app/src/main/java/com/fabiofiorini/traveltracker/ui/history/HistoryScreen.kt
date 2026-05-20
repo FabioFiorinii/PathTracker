@@ -15,9 +15,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -33,9 +30,11 @@ fun HistoryScreen(
         mutableStateOf<RouteEntity?>(null)
     }
 
-    val viewModel: TrackingViewModel = viewModel()
+    var toDeleteRoute by remember {
+        mutableStateOf<RouteEntity?>(null)
+    }
 
-    val scope = rememberCoroutineScope()
+    val viewModel: TrackingViewModel = viewModel()
 
     val routes by viewModel.routes.collectAsState(initial = emptyList())
 
@@ -109,7 +108,7 @@ fun HistoryScreen(
 
                             OutlinedButton(
                                 onClick = {
-                                    viewModel.deleteRoute(route)
+                                    toDeleteRoute = route
                                 }
                             ) {
                                 Icon(
@@ -172,6 +171,49 @@ fun HistoryScreen(
                     }
                 }
             )
+        }
+
+        toDeleteRoute?.let { route ->
+            AlertDialog(
+                onDismissRequest = {
+                    toDeleteRoute = null
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.deleteRoute(route)
+                            toDeleteRoute = null
+                        }
+                    ) {
+                        Text("Cancella")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            toDeleteRoute = null
+                        }
+                    ) {
+                        Text("Annulla")
+                    }
+                },
+                title = {
+                    Text(route.title)
+                },
+                text = {
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        Text(
+                           "Sei sicuro di voler eliminare il percorso?"
+                        )
+
+                    }
+                }
+            )
+
         }
     }
 }

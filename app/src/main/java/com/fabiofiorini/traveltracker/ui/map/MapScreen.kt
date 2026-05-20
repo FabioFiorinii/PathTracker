@@ -2,6 +2,7 @@ package com.fabiofiorini.traveltracker.ui.map
 
 import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -159,12 +160,17 @@ fun MapScreen(
             Icon(Icons.Default.MyLocation, null)
         }
 
+        BackHandler {
+
+            showDialog = true
+        }
+
         FloatingActionButton(
             onClick = {
                 showDialog = true
             },
             modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomStart)
                 .padding(16.dp)
         ) {
             Icon(Icons.Default.Stop, contentDescription = null)
