@@ -10,12 +10,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.fabiofiorini.traveltracker.data.DatabaseProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -27,20 +25,15 @@ fun RouteMapScreen(
     onClose: () -> Unit
 ) {
 
-    val context = LocalContext.current
-    val db = remember {
-        DatabaseProvider.getDatabase(context)
-    }
-
     var points by remember {
         mutableStateOf<List<GeoPoint>>(emptyList())
     }
 
+    val viewModel: TrackingViewModel = viewModel()
+
     LaunchedEffect(Unit) {
 
-        val routePoints = withContext(Dispatchers.IO) {
-            db.routeDao().getRoutePoints(routeId)
-        }
+        val routePoints = viewModel.getPoints(routeId)
 
         points = routePoints.map {
             GeoPoint(it.lat, it.lon)

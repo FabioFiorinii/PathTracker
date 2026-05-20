@@ -1,6 +1,6 @@
 package com.fabiofiorini.traveltracker.ui.history
 
-import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,11 +10,11 @@ import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.fabiofiorini.traveltracker.data.DatabaseProvider
 import com.fabiofiorini.traveltracker.data.RouteEntity
+import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,27 +28,16 @@ fun HistoryScreen(
     navController: NavController
 ) {
 
-    val context = LocalContext.current
-    val db = remember { DatabaseProvider.getDatabase(context) }
-
-    var routes by remember {
-        mutableStateOf<List<RouteEntity>>(emptyList())
-    }
 
     var selectedRoute by remember {
         mutableStateOf<RouteEntity?>(null)
     }
 
+    val viewModel: TrackingViewModel = viewModel()
+
     val scope = rememberCoroutineScope()
 
-    suspend fun refreshRoutes() {
-        routes = withContext(Dispatchers.IO) {
-            db.routeDao().getAllRoutes()
-        }
-    }
-    LaunchedEffect(Unit) {
-        refreshRoutes()
-    }
+    val routes by viewModel.routes.collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = {
@@ -120,14 +109,7 @@ fun HistoryScreen(
 
                             OutlinedButton(
                                 onClick = {
-                                    scope.launch {
-                                        withContext(Dispatchers.IO) {
-                                            db.routeDao().deleteRoute(route)
-                                            db.routeDao().deletePointsByRoute(route.id)
-                                        }
-
-                                        refreshRoutes()
-                                    }
+                                    viewModel.deleteRoute(route)
                                 }
                             ) {
                                 Icon(

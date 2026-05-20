@@ -1,6 +1,8 @@
 package com.fabiofiorini.traveltracker.ui.map
 
 import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
@@ -12,15 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.traveltracker.tracking.TrackingManager
 import com.fabiofiorini.traveltracker.service.TrackingService
+import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
     onStop: () -> Unit
@@ -40,6 +44,9 @@ fun MapScreen(
         mutableStateOf<MapView?>(null)
     }
 
+    var showDialog by remember { mutableStateOf(false) }
+    var routeTitle by remember { mutableStateOf("") }
+
     var marker by remember {
         mutableStateOf<Marker?>(null)
     }
@@ -47,6 +54,8 @@ fun MapScreen(
     var polyline by remember {
         mutableStateOf<Polyline?>(null)
     }
+
+    val viewModel: TrackingViewModel = viewModel()
 
     LaunchedEffect(Unit) {
 
@@ -152,20 +161,73 @@ fun MapScreen(
 
         FloatingActionButton(
             onClick = {
-                val intent = Intent(
-                    context,
-                    TrackingService::class.java
-                )
-
-                context.stopService(intent)
-
-                onStop()
+                showDialog = true
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
-            ) {
-            Icon(Icons.Default.Stop, null)
+        ) {
+            Icon(Icons.Default.Stop, contentDescription = null)
+        }
+
+        if (showDialog) {
+
+            AlertDialog(
+                onDismissRequest = {
+                    showDialog = false
+                },
+
+                title = {
+                    Text("Salva percorso")
+                },
+
+                text = {
+                    OutlinedTextField(
+                        value = routeTitle,
+                        onValueChange = {
+                            routeTitle = it
+                        },
+                        label = {
+                            Text("Titolo")
+                        },
+                        singleLine = true
+                    )
+                },
+
+                confirmButton = {
+
+                    Button(
+                        onClick = {
+
+                            val intent = Intent(
+                                context,
+                                TrackingService::class.java
+                            )
+
+                            context.stopService(intent)
+
+                            viewModel.saveCurrentRoute(routeTitle)
+
+                            showDialog = false
+
+                            onStop()
+                        }
+                    ) {
+                        Text("Salva")
+                    }
+                },
+
+                dismissButton = {
+
+                    OutlinedButton(
+                        onClick = {
+                            showDialog = false
+                        }
+                    ) {
+                        Text("Annulla")
+                    }
+                }
+            )
         }
     }
 }
