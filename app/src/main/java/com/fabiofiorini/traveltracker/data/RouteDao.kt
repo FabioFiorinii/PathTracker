@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RouteDao {
@@ -15,7 +16,7 @@ interface RouteDao {
     suspend fun insertPoints(points: List<RoutePointEntity>)
 
     @Query("SELECT * FROM routes ORDER BY date DESC")
-    suspend fun getAllRoutes(): List<RouteEntity>
+    fun getAllRoutes(): Flow<List<RouteEntity>>
 
     @Query("SELECT * FROM route_points WHERE routeId = :routeId ORDER BY timestamp ASC")
     suspend fun getRoutePoints(routeId: Long): List<RoutePointEntity>
@@ -25,4 +26,10 @@ interface RouteDao {
 
     @Query("DELETE FROM route_points WHERE routeId = :routeId")
     suspend fun deletePointsByRoute(routeId: Long)
+
+
+    @Query("SELECT * FROM route_points WHERE routeId = :routeId")
+    suspend fun getPointsForRoute(
+        routeId: Long
+    ): List<RoutePointEntity>
 }
