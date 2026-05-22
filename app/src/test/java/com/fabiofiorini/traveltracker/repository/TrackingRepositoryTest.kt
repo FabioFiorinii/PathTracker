@@ -5,17 +5,17 @@ import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.data.RoutePointEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TrackingRepositoryTest {
 
     private fun createFakeDao(): RouteDao {
-        val routes = mutableListOf<RouteEntity>()
-        val points = mutableListOf<RoutePointEntity>()
+        val savedRoutes = mutableListOf<RouteEntity>()
+        val savedPoints = mutableListOf<RoutePointEntity>()
         var nextRouteId = 1L
         val routesFlow = MutableStateFlow(listOf<RouteEntity>())
 
@@ -23,32 +23,32 @@ class TrackingRepositoryTest {
             override suspend fun insertRoute(route: RouteEntity): Long {
                 val id = nextRouteId++
                 val saved = route.copy(id = id)
-                routes.add(saved)
-                routesFlow.value = routes.toList()
+                savedRoutes.add(saved)
+                routesFlow.value = savedRoutes.toList()
                 return id
             }
 
             override suspend fun insertPoints(points: List<RoutePointEntity>) {
                 var nextId = points.size + 1L
-                this.points.addAll(points.map { it.copy(id = nextId++) })
+                savedPoints.addAll(points.map { it.copy(id = nextId++) })
             }
 
             override fun getAllRoutes(): Flow<List<RouteEntity>> = routesFlow
 
             override suspend fun getRoutePoints(routeId: Long): List<RoutePointEntity> =
-                points.filter { it.routeId == routeId }
+                savedPoints.filter { it.routeId == routeId }
 
             override suspend fun deleteRoute(route: RouteEntity) {
-                routes.removeAll { it.id == route.id }
-                routesFlow.value = routes.toList()
+                savedRoutes.removeAll { it.id == route.id }
+                routesFlow.value = savedRoutes.toList()
             }
 
             override suspend fun deletePointsByRoute(routeId: Long) {
-                points.removeAll { it.routeId == routeId }
+                savedPoints.removeAll { it.routeId == routeId }
             }
 
             override suspend fun getPointsForRoute(routeId: Long): List<RoutePointEntity> =
-                points.filter { it.routeId == routeId }
+                savedPoints.filter { it.routeId == routeId }
         }
     }
 
@@ -67,13 +67,9 @@ class TrackingRepositoryTest {
         val id = repo.saveRoute(route)
 
         assertTrue(id > 0)
-        val saved = repo.getAllRoutes().let { flow ->
-            var result: List<RouteEntity>? = null
-            flow.collect { result = it }
-            result
-        }
-        assertEquals(1, saved?.size)
-        assertEquals("Test percorso", saved?.first()?.title)
+        val saved = repo.getAllRoutes().first()
+        assertEquals(1, saved.size)
+        assertEquals("Test percorso", saved.first().title)
     }
 
     @Test
