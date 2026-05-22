@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fabiofiorini.traveltracker.tracking.TrackingManager
 import com.fabiofiorini.traveltracker.service.TrackingService
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import org.osmdroid.config.Configuration
@@ -32,14 +31,6 @@ fun MapScreen(
 ) {
 
     val context = LocalContext.current
-
-    val routePoints = TrackingManager.points
-
-    val elapsedSeconds =
-        TrackingManager.elapsedSeconds.longValue
-
-    val distanceMeters =
-        TrackingManager.distanceMeters.floatValue
 
     var mapView by remember {
         mutableStateOf<MapView?>(null)
@@ -58,7 +49,14 @@ fun MapScreen(
 
     val viewModel: TrackingViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
+    val routePoints = viewModel.routePoints
+
+    val elapsedSeconds = viewModel.elapsedSeconds.longValue
+
+    val distanceMeters = viewModel.distanceMeters.floatValue
+
+
+    LaunchedEffect(true) {
 
         Configuration.getInstance().userAgentValue =
             context.packageName
@@ -111,7 +109,9 @@ fun MapScreen(
 
                     marker?.position = lastPoint
 
-                    polyline?.setPoints(routePoints)
+                    if (polyline?.getActualPoints()?.size != routePoints.size) {
+                        polyline?.setPoints(routePoints)
+                    }
 
                     map.invalidate()
                 }

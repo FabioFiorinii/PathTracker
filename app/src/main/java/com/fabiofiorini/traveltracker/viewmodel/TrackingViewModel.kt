@@ -19,6 +19,12 @@ class TrackingViewModel(
 
     val routes: Flow<List<RouteEntity>>
 
+    val routePoints = TrackingManager.points
+
+    val elapsedSeconds = TrackingManager.elapsedSeconds
+
+    val distanceMeters = TrackingManager.distanceMeters
+
     init {
 
         val dao = DatabaseProvider
