@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
@@ -13,6 +12,7 @@ import com.fabiofiorini.traveltracker.ui.map.MapScreen
 import com.fabiofiorini.traveltracker.ui.history.HistoryScreen
 import com.fabiofiorini.traveltracker.ui.history.RouteMapScreen
 import com.fabiofiorini.traveltracker.ui.start.StartScreen
+import com.fabiofiorini.traveltracker.ui.theme.TravelTrackerTheme
 import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
         // 🎨 UI Compose
         setContent {
-            MaterialTheme {
+            TravelTrackerTheme {
 
                 val navController = rememberNavController()
 
