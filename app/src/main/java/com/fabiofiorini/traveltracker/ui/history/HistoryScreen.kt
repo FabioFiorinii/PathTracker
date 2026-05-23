@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Orange
@@ -30,7 +29,7 @@ import java.util.*
 @Composable
 fun HistoryScreen(
     onBack: () -> Unit,
-    navController: NavController
+    onRouteSelected: (Long) -> Unit
 ) {
     var selectedRoute by remember {
         mutableStateOf<RouteEntity?>(null)
@@ -126,7 +125,7 @@ fun HistoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Button(
-                                    { navController.navigate("routeMap/${route.id}") },
+                                    { onRouteSelected(route.id) },
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Red
                                     )

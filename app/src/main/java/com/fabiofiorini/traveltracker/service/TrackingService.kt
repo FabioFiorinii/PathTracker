@@ -37,6 +37,10 @@ class TrackingService : Service() {
 
     private lateinit var callback: LocationCallback
 
+    private val trackingManager: TrackingManager
+        get() = TrackingManager.current
+            ?: error("TrackingManager non inizializzato")
+
     override fun onCreate() {
         super.onCreate()
 
@@ -61,8 +65,8 @@ class TrackingService : Service() {
             while (true) {
                 delay(1000)
 
-                if (TrackingManager.isTracking.value) {
-                    TrackingManager.elapsedSeconds.longValue++
+                if (trackingManager.isTracking.value) {
+                    trackingManager.elapsedSeconds.longValue++
                 }
             }
         }
@@ -71,7 +75,7 @@ class TrackingService : Service() {
     @SuppressLint("MissingPermission")
     private fun startTracking() {
 
-        TrackingManager.isTracking.value = true
+        trackingManager.isTracking.value = true
 
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -89,7 +93,6 @@ class TrackingService : Service() {
                     location.longitude
                 )
 
-                // smoothing GPS
                 smoothPoints.add(newPoint)
 
                 if (smoothPoints.size > 5) {
@@ -100,8 +103,7 @@ class TrackingService : Service() {
                 val avgLon = smoothPoints.map { it.longitude }.average()
                 val smoothPoint = GeoPoint(avgLat, avgLon)
 
-                // anti jitter
-                val previousPoint = TrackingManager.points.lastOrNull()
+                val previousPoint = trackingManager.points.lastOrNull()
 
                 if (previousPoint != null) {
 
@@ -117,16 +119,15 @@ class TrackingService : Service() {
 
                     val distance = results[0]
 
-                    // ignora micro movimenti sotto 3 metri
                     if (distance < 3f) {
                         return
                     }
                 }
 
-                TrackingManager.points.add(smoothPoint)
+                trackingManager.points.add(smoothPoint)
 
                 if (lastLocation != null) {
-                    TrackingManager.distanceMeters.floatValue +=
+                    trackingManager.distanceMeters.floatValue +=
                         lastLocation!!.distanceTo(location)
                 }
 
@@ -182,7 +183,7 @@ class TrackingService : Service() {
 
         timerJob?.cancel()
 
-        TrackingManager.isTracking.value = false
+        trackingManager.isTracking.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

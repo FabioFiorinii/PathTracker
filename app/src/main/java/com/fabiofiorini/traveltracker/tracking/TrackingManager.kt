@@ -6,7 +6,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import org.osmdroid.util.GeoPoint
 
-object TrackingManager {
+class TrackingManager {
+
+    companion object {
+        @Volatile
+        var current: TrackingManager? = null
+    }
 
     val points = mutableStateListOf<GeoPoint>()
 

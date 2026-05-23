@@ -12,28 +12,33 @@ import com.fabiofiorini.traveltracker.tracking.TrackingManager
 import kotlinx.coroutines.launch
 
 class TrackingViewModel(
-    application: Application
+    application: Application,
+    private val repository: TrackingRepository? = null
 ) : AndroidViewModel(application) {
 
-    private val repository: TrackingRepository
+    private val repo: TrackingRepository
+
+    val trackingManager = TrackingManager().also {
+        TrackingManager.current = it
+    }
 
     val routes: Flow<List<RouteEntity>>
 
-    val routePoints = TrackingManager.points
+    val routePoints = trackingManager.points
 
-    val elapsedSeconds = TrackingManager.elapsedSeconds
+    val elapsedSeconds = trackingManager.elapsedSeconds
 
-    val distanceMeters = TrackingManager.distanceMeters
+    val distanceMeters = trackingManager.distanceMeters
 
     init {
+        repo = repository ?: run {
+            val dao = DatabaseProvider
+                .getDatabase(application)
+                .routeDao()
+            TrackingRepository(dao)
+        }
 
-        val dao = DatabaseProvider
-            .getDatabase(application)
-            .routeDao()
-
-        repository = TrackingRepository(dao)
-
-        routes = repository.getAllRoutes()
+        routes = repo.getAllRoutes()
     }
 
     fun saveCurrentRoute(title: String) {
@@ -41,21 +46,21 @@ class TrackingViewModel(
         viewModelScope.launch {
 
             val avgSpeed =
-                if (TrackingManager.elapsedSeconds.longValue > 0)
-                    (TrackingManager.distanceMeters.floatValue / 1000f) /
-                            (TrackingManager.elapsedSeconds.longValue / 3600f)
+                if (trackingManager.elapsedSeconds.longValue > 0)
+                    (trackingManager.distanceMeters.floatValue / 1000f) /
+                            (trackingManager.elapsedSeconds.longValue / 3600f)
                 else 0f
             val route = RouteEntity(
                 title = title,
                 date = System.currentTimeMillis(),
-                durationSec = TrackingManager.elapsedSeconds.longValue,
-                distanceKm = TrackingManager.distanceMeters.floatValue / 1000f,
+                durationSec = trackingManager.elapsedSeconds.longValue,
+                distanceKm = trackingManager.distanceMeters.floatValue / 1000f,
                 averageSpeedKmh = avgSpeed
             )
 
-            val routeId = repository.saveRoute(route)
+            val routeId = repo.saveRoute(route)
 
-            val points = TrackingManager.points.map {
+            val points = trackingManager.points.map {
                 RoutePointEntity(
                     routeId = routeId,
                     lat = it.latitude,
@@ -64,9 +69,9 @@ class TrackingViewModel(
                 )
             }
 
-            repository.savePoints(points)
+            repo.savePoints(points)
 
-            TrackingManager.reset()
+            trackingManager.reset()
         }
     }
 
@@ -74,14 +79,14 @@ class TrackingViewModel(
 
         viewModelScope.launch {
 
-            repository.deletePoints(route.id)
-            repository.deleteRoute(route)
+            repo.deletePoints(route.id)
+            repo.deleteRoute(route)
         }
     }
 
     suspend fun getPoints(routeId: Long) =
-        repository.getPoints(routeId)
+        repo.getPoints(routeId)
 
     suspend fun getRoute(routeId: Long) =
-        repository.getRoute(routeId)
+        repo.getRoute(routeId)
 }

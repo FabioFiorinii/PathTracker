@@ -62,7 +62,9 @@ class MainActivity : ComponentActivity() {
                             onBack = {
                                 navController.popBackStack()
                             },
-                            navController = navController
+                            onRouteSelected = { routeId ->
+                                navController.navigate("routeMap/$routeId")
+                            }
                         )
                     }
 
