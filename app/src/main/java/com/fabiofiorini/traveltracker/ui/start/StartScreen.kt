@@ -4,9 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.NearMe
@@ -17,9 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -37,8 +34,6 @@ fun StartScreen(
     onStartTracking: () -> Unit,
     onHistory: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
-
     var startAnimation by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -55,27 +50,26 @@ fun StartScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Dark)
-            .verticalScroll(scrollState)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(60.dp))
+        Spacer(Modifier.height(48.dp))
 
-        HeroSection(heroAlpha)
+        HeroSection(alpha = heroAlpha)
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(20.dp))
 
-        FeatureCards(startAnimation)
+        StatsBar(startAnimation)
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
 
-        StatsCard()
+        FeaturePills(startAnimation)
 
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.weight(1f))
 
         CTASection(onStartTracking, onHistory)
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -88,11 +82,11 @@ private fun HeroSection(alpha: Float) {
         Icon(
             imageVector = Icons.Default.NearMe,
             contentDescription = null,
-            modifier = Modifier.size(72.dp),
+            modifier = Modifier.size(56.dp),
             tint = Red
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         Text(
             text = "TravelTracker",
@@ -101,11 +95,11 @@ private fun HeroSection(alpha: Float) {
             color = Red
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "Traccia i tuoi percorsi outdoor\ncon precisione GPS",
-            style = MaterialTheme.typography.bodyLarge,
+            text = "Traccia i tuoi percorsi outdoor con precisione GPS",
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.White.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
@@ -113,130 +107,33 @@ private fun HeroSection(alpha: Float) {
 }
 
 @Composable
-private fun FeatureCards(startAnimation: Boolean) {
-    val features = listOf(
-        FeatureData(
-            icon = Icons.Default.Route,
-            title = "Registrazione GPS",
-            desc = "Cattura ogni tuo spostamento con precisione in tempo reale"
-        ),
-        FeatureData(
-            icon = Icons.Default.Timer,
-            title = "Statistiche di viaggio",
-            desc = "Visualizza distanza, durata e velocità media dei percorsi"
-        ),
-        FeatureData(
-            icon = Icons.Default.SaveAlt,
-            title = "Salva e condividi",
-            desc = "Archivia i percorsi completati e rivedili in qualsiasi momento"
-        )
-    )
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        features.forEachIndexed { index, feature ->
-            FeatureCard(
-                feature = feature,
-                delayMs = 150L + index * 100L,
-                startAnimation = startAnimation
-            )
-        }
-    }
-}
-
-@Composable
-private fun FeatureCard(
-    feature: FeatureData,
-    delayMs: Long,
-    startAnimation: Boolean
-) {
-    var visible by remember { mutableStateOf(!startAnimation) }
-
-    LaunchedEffect(startAnimation) {
-        if (startAnimation) {
-            delay(delayMs)
-            visible = true
-        }
-    }
-
+private fun StatsBar(startAnimation: Boolean) {
     val offsetY by animateFloatAsState(
-        targetValue = if (visible) 0f else 32f,
-        animationSpec = tween(420),
-        label = "offset"
+        targetValue = if (startAnimation) 0f else 24f,
+        animationSpec = tween(420), label = "offset"
     )
-
-    val cardAlpha by animateFloatAsState(
-        targetValue = if (visible) 1f else 0f,
-        animationSpec = tween(420),
-        label = "alpha"
+    val barAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(420), label = "alpha"
     )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(cardAlpha)
+            .alpha(barAlpha)
             .offset(y = offsetY.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2A2A2A)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Red),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = feature.icon,
-                    contentDescription = null,
-                    tint = White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Spacer(Modifier.width(16.dp))
-
-            Column {
-                Text(
-                    text = feature.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
-                )
-                Text(
-                    text = feature.desc,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.6f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF2A2A2A)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             StatItem(value = "0", label = "Percorsi")
-            StatItem(value = "0", label = "km totali")
-            StatItem(value = "0", label = "h tracciate")
+            StatItem(value = "0", label = "km")
+            StatItem(value = "0", label = "ore")
         }
     }
 }
@@ -246,16 +143,71 @@ private fun StatItem(value: String, label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            style = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
+            style = MaterialTheme.typography.displayLarge.copy(fontSize = 24.sp),
             fontWeight = FontWeight.Bold,
             color = Red
         )
-        Spacer(Modifier.height(4.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = Color.White.copy(alpha = 0.6f)
         )
+    }
+}
+
+@Composable
+private fun FeaturePills(startAnimation: Boolean) {
+    val pills = listOf(
+        PillData(icon = Icons.Default.Route, label = "GPS"),
+        PillData(icon = Icons.Default.Timer, label = "Statistiche"),
+        PillData(icon = Icons.Default.SaveAlt, label = "Salva")
+    )
+
+    val offsetY by animateFloatAsState(
+        targetValue = if (startAnimation) 0f else 20f,
+        animationSpec = tween(420), label = "offset"
+    )
+    val pillsAlpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(420), label = "alpha"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(pillsAlpha)
+            .offset(y = offsetY.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        pills.forEach { pill ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Color(0xFF2A2A2A)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = pill.icon,
+                        contentDescription = null,
+                        tint = Red,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = pill.label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.7f)
+                )
+            }
+        }
     }
 }
 
@@ -275,9 +227,7 @@ private fun CTASection(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Red
-            )
+            colors = ButtonDefaults.buttonColors(containerColor = Red)
         ) {
             Text(
                 text = "Registra nuovo percorso",
@@ -293,9 +243,7 @@ private fun CTASection(
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = Orange
-            )
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Orange)
         ) {
             Icon(
                 imageVector = Icons.Default.History,
@@ -312,8 +260,4 @@ private fun CTASection(
     }
 }
 
-private data class FeatureData(
-    val icon: ImageVector,
-    val title: String,
-    val desc: String
-)
+private data class PillData(val icon: ImageVector, val label: String)

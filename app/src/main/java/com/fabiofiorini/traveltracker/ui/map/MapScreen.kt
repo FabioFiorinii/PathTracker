@@ -4,12 +4,14 @@ import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,6 +75,10 @@ fun MapScreen(
         context.startForegroundService(intent)
     }
 
+    val avgSpeed =
+        if (elapsedSeconds > 0) (distanceMeters / 1000f) / (elapsedSeconds / 3600f)
+        else 0f
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -121,23 +127,60 @@ fun MapScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(12.dp)
             ) {
-                Text(
-                    "Tempo: ${
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Timer,
+                        contentDescription = null,
+                        tint = Red,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
                         "%02d:%02d:%02d".format(
                             elapsedSeconds / 3600,
                             (elapsedSeconds % 3600) / 60,
                             elapsedSeconds % 60
-                        )
-                    }",
-                    color = White,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    "Distanza: %.2f km".format(distanceMeters / 1000f),
-                    color = White.copy(alpha = 0.7f)
-                )
+                        ),
+                        color = White,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Route,
+                        contentDescription = null,
+                        tint = Orange,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "%.2f km".format(distanceMeters / 1000f),
+                        color = White.copy(alpha = 0.8f)
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Speed,
+                        contentDescription = null,
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "%.1f km/h".format(avgSpeed),
+                        color = White.copy(alpha = 0.8f)
+                    )
+                }
             }
         }
 

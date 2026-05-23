@@ -7,8 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -55,87 +57,113 @@ fun HistoryScreen(
         },
         containerColor = Dark
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(routes) { route ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF2A2A2A)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        if (routes.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
+                    Icon(
+                        Icons.Default.Route,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = Color.White.copy(alpha = 0.3f)
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        "Nessun percorso registrato",
+                        color = Color.White.copy(alpha = 0.5f),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(routes) { route ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF2A2A2A)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Text(
-                            route.title,
-                            color = White,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            SimpleDateFormat(
-                                "dd/MM/yyyy HH:mm",
-                                Locale.getDefault()
-                            ).format(Date(route.date)),
-                            color = White.copy(alpha = 0.6f),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            "%.2f km".format(route.distanceKm),
-                            color = Red,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        Column(
+                            modifier = Modifier.padding(16.dp)
                         ) {
-                            Button(
-                                { navController.navigate("routeMap/${route.id}") },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Red
-                                )
+                            Text(
+                                route.title,
+                                color = White,
+                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                SimpleDateFormat(
+                                    "dd/MM/yyyy HH:mm",
+                                    Locale.getDefault()
+                                ).format(Date(route.date)),
+                                color = White.copy(alpha = 0.6f),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                "%.2f km".format(route.distanceKm),
+                                color = Red,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Map,
-                                    contentDescription = null,
-                                    tint = White
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Mappa", color = White)
-                            }
+                                Button(
+                                    { navController.navigate("routeMap/${route.id}") },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Red
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Map,
+                                        contentDescription = null,
+                                        tint = White
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Mappa", color = White)
+                                }
 
-                            Button(
-                                onClick = {
-                                    selectedRoute = route
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Orange
-                                )
-                            ) {
-                                Text("Info", color = White)
-                            }
+                                Button(
+                                    onClick = {
+                                        selectedRoute = route
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Orange
+                                    )
+                                ) {
+                                    Text("Info", color = White)
+                                }
 
-                            OutlinedButton(
-                                onClick = {
-                                    toDeleteRoute = route
-                                },
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = Red
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = null
-                                )
+                                OutlinedButton(
+                                    onClick = {
+                                        toDeleteRoute = route
+                                    },
+                                    colors = ButtonDefaults.outlinedButtonColors(
+                                        contentColor = Red
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                         }
                     }

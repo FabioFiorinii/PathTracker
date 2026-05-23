@@ -1,14 +1,17 @@
 package com.fabiofiorini.traveltracker.ui.history
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -39,6 +42,7 @@ fun RouteMapScreen(
     }
 
     val viewModel: TrackingViewModel = viewModel()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         val routePoints = viewModel.getPoints(routeId)
@@ -69,22 +73,12 @@ fun RouteMapScreen(
                     val startMarker = Marker(map)
                     startMarker.position = points.first()
                     startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    val startIcon = Marker(map)
-                    startIcon.icon = ctx.getDrawable(
-                        android.R.drawable.ic_menu_mylocation
-                    )
-                    if (startIcon.icon != null) {
-                        startMarker.icon = startIcon.icon
-                    }
                     startMarker.title = "Partenza"
                     map.overlays.add(startMarker)
 
                     val endMarker = Marker(map)
                     endMarker.position = points.last()
                     endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    endMarker.icon = ctx.getDrawable(
-                        android.R.drawable.ic_menu_compass
-                    )
                     endMarker.title = "Arrivo"
                     map.overlays.add(endMarker)
 
@@ -130,16 +124,38 @@ fun RouteMapScreen(
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(12.dp)
             ) {
                 route?.let { r ->
-                    Text(
-                        r.title,
-                        color = White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            r.title,
+                            color = White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    "Esportazione GPX disponibile in un aggiornamento futuro",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FileDownload,
+                                contentDescription = "Scarica GPX",
+                                tint = Red
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         SimpleDateFormat(
                             "dd/MM/yyyy HH:mm",
@@ -149,23 +165,29 @@ fun RouteMapScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(6.dp))
-                    Text(
-                        "Distanza: %.2f km".format(r.distanceKm),
-                        color = White,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text(
-                        "Durata: %02d:%02d:%02d".format(
-                            r.durationSec / 3600,
-                            (r.durationSec % 3600) / 60,
-                            r.durationSec % 60
-                        ),
-                        color = White.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        "Vel. media: %.2f km/h".format(r.averageSpeedKmh),
-                        color = White.copy(alpha = 0.7f)
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "%.2f km".format(r.distanceKm),
+                            color = Red,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            "%02d:%02d:%02d".format(
+                                r.durationSec / 3600,
+                                (r.durationSec % 3600) / 60,
+                                r.durationSec % 60
+                            ),
+                            color = White.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Text(
+                            "%.1f km/h".format(r.averageSpeedKmh),
+                            color = White.copy(alpha = 0.7f)
+                        )
+                    }
                 } ?: run {
                     Text(
                         "Caricamento...",
