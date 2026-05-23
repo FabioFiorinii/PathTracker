@@ -32,4 +32,7 @@ class TrackingRepository(
 
     suspend fun getPoints(routeId: Long) =
         dao.getPointsForRoute(routeId)
+
+    suspend fun getRoute(routeId: Long) =
+        dao.getRouteById(routeId)
 }

@@ -81,4 +81,7 @@ class TrackingViewModel(
 
     suspend fun getPoints(routeId: Long) =
         repository.getPoints(routeId)
+
+    suspend fun getRoute(routeId: Long) =
+        repository.getRoute(routeId)
 }

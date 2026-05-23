@@ -32,4 +32,7 @@ interface RouteDao {
     suspend fun getPointsForRoute(
         routeId: Long
     ): List<RoutePointEntity>
+
+    @Query("SELECT * FROM routes WHERE id = :routeId")
+    suspend fun getRouteById(routeId: Long): RouteEntity?
 }
