@@ -5,9 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,15 +41,52 @@ fun HistoryScreen(
         mutableStateOf<RouteEntity?>(null)
     }
 
+    var searchQuery by remember { mutableStateOf("") }
+
     val viewModel: TrackingViewModel = viewModel()
 
     val routes by viewModel.routes.collectAsState(initial = emptyList())
 
+    val filteredRoutes = when {
+        searchQuery.isBlank() -> routes
+        else -> routes.filter {
+            it.title.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Indietro",
+                            tint = White
+                        )
+                    }
+                },
                 title = {
-                    Text("Storico percorsi", color = White, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Route,
+                            contentDescription = null,
+                            tint = Red
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column {
+                            Text(
+                                "Storico percorsi",
+                                color = Red,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                "I tuoi percorsi",
+                                color = White.copy(alpha = 0.5f),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Dark
@@ -56,112 +95,145 @@ fun HistoryScreen(
         },
         containerColor = Dark
     ) { padding ->
-        if (routes.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        Icons.Default.Route,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = Color.White.copy(alpha = 0.3f)
-                    )
-                    Spacer(Modifier.height(16.dp))
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                placeholder = {
                     Text(
-                        "Nessun percorso registrato",
-                        color = Color.White.copy(alpha = 0.5f),
-                        style = MaterialTheme.typography.bodyLarge
+                        "Cerca percorso",
+                        color = White.copy(alpha = 0.4f)
                     )
-                }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(routes) { route ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF2A2A2A)
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        tint = White.copy(alpha = 0.5f)
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Red,
+                    unfocusedBorderColor = White.copy(alpha = 0.2f),
+                    cursorColor = Red,
+                    focusedTextColor = White,
+                    unfocusedTextColor = White
+                )
+            )
+
+            if (filteredRoutes.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
+                        Icon(
+                            Icons.Default.Route,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = Color.White.copy(alpha = 0.3f)
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            if (searchQuery.isBlank()) "Nessun percorso registrato"
+                            else "Nessun risultato",
+                            color = Color.White.copy(alpha = 0.5f),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredRoutes) { route ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFF2A2A2A)
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
-                            Text(
-                                route.title,
-                                color = White,
-                                fontWeight = FontWeight.SemiBold,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                SimpleDateFormat(
-                                    "dd/MM/yyyy HH:mm",
-                                    Locale.getDefault()
-                                ).format(Date(route.date)),
-                                color = White.copy(alpha = 0.6f),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                "%.2f km".format(route.distanceKm),
-                                color = Red,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            Column(
+                                modifier = Modifier.padding(16.dp)
                             ) {
-                                Button(
-                                    { onRouteSelected(route.id) },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Red
-                                    )
+                                Text(
+                                    route.title,
+                                    color = White,
+                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    SimpleDateFormat(
+                                        "dd/MM/yyyy HH:mm",
+                                        Locale.getDefault()
+                                    ).format(Date(route.date)),
+                                    color = White.copy(alpha = 0.6f),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    "%.2f km".format(route.distanceKm),
+                                    color = Red,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Map,
-                                        contentDescription = null,
-                                        tint = White
-                                    )
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Mappa", color = White)
-                                }
+                                    Button(
+                                        { onRouteSelected(route.id) },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Red
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Map,
+                                            contentDescription = null,
+                                            tint = White
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Mappa", color = White)
+                                    }
 
-                                Button(
-                                    onClick = {
-                                        selectedRoute = route
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = Orange
-                                    )
-                                ) {
-                                    Text("Info", color = White)
-                                }
+                                    Button(
+                                        onClick = {
+                                            selectedRoute = route
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Orange
+                                        )
+                                    ) {
+                                        Text("Info", color = White)
+                                    }
 
-                                OutlinedButton(
-                                    onClick = {
-                                        toDeleteRoute = route
-                                    },
-                                    colors = ButtonDefaults.outlinedButtonColors(
-                                        contentColor = Red
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = null
-                                    )
+                                    OutlinedButton(
+                                        onClick = {
+                                            toDeleteRoute = route
+                                        },
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            contentColor = Red
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = null
+                                        )
+                                    }
                                 }
                             }
                         }

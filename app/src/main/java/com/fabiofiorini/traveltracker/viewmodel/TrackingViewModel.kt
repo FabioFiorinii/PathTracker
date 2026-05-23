@@ -11,7 +11,7 @@ import com.fabiofiorini.traveltracker.repository.TrackingRepository
 import com.fabiofiorini.traveltracker.tracking.TrackingManager
 import kotlinx.coroutines.launch
 
-class TrackingViewModel(
+class TrackingViewModel @JvmOverloads constructor(
     application: Application,
     private val repository: TrackingRepository? = null
 ) : AndroidViewModel(application) {
@@ -23,6 +23,12 @@ class TrackingViewModel(
     }
 
     val routes: Flow<List<RouteEntity>>
+
+    val routeCount: Flow<Int>
+
+    val totalDistanceKm: Flow<Float>
+
+    val totalDurationSec: Flow<Long>
 
     val routePoints = trackingManager.points
 
@@ -39,6 +45,9 @@ class TrackingViewModel(
         }
 
         routes = repo.getAllRoutes()
+        routeCount = repo.getRouteCount()
+        totalDistanceKm = repo.getTotalDistanceKm()
+        totalDurationSec = repo.getTotalDurationSec()
     }
 
     fun saveCurrentRoute(title: String) {

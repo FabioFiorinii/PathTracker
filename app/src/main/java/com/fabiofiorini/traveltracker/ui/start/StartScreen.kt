@@ -23,16 +23,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Orange
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
+import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun StartScreen(
     onStartTracking: () -> Unit,
-    onHistory: () -> Unit
+    onHistory: () -> Unit,
+    viewModel: TrackingViewModel = viewModel()
 ) {
     var startAnimation by remember { mutableStateOf(false) }
 
@@ -59,7 +62,7 @@ fun StartScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        StatsBar(startAnimation)
+        StatsBar(startAnimation, viewModel)
 
         Spacer(Modifier.height(24.dp))
 
@@ -107,7 +110,11 @@ private fun HeroSection(alpha: Float) {
 }
 
 @Composable
-private fun StatsBar(startAnimation: Boolean) {
+private fun StatsBar(startAnimation: Boolean, viewModel: TrackingViewModel) {
+    val routeCount by viewModel.routeCount.collectAsState(initial = 0)
+    val totalKm by viewModel.totalDistanceKm.collectAsState(initial = 0f)
+    val totalSec by viewModel.totalDurationSec.collectAsState(initial = 0L)
+
     val offsetY by animateFloatAsState(
         targetValue = if (startAnimation) 0f else 24f,
         animationSpec = tween(420), label = "offset"
@@ -131,9 +138,9 @@ private fun StatsBar(startAnimation: Boolean) {
                 .padding(20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            StatItem(value = "0", label = "Percorsi")
-            StatItem(value = "0", label = "km")
-            StatItem(value = "0", label = "ore")
+            StatItem(value = "$routeCount", label = "Percorsi")
+            StatItem(value = "%.1f".format(totalKm), label = "km")
+            StatItem(value = "${totalSec / 3600}", label = "ore")
         }
     }
 }

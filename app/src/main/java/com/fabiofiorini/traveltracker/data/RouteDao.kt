@@ -35,4 +35,13 @@ interface RouteDao {
 
     @Query("SELECT * FROM routes WHERE id = :routeId")
     suspend fun getRouteById(routeId: Long): RouteEntity?
+
+    @Query("SELECT COUNT(*) FROM routes")
+    fun getRouteCount(): Flow<Int>
+
+    @Query("SELECT COALESCE(SUM(distanceKm), 0) FROM routes")
+    fun getTotalDistanceKm(): Flow<Float>
+
+    @Query("SELECT COALESCE(SUM(durationSec), 0) FROM routes")
+    fun getTotalDurationSec(): Flow<Long>
 }

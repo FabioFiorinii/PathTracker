@@ -35,4 +35,10 @@ class TrackingRepository(
 
     suspend fun getRoute(routeId: Long) =
         dao.getRouteById(routeId)
+
+    fun getRouteCount() = dao.getRouteCount()
+
+    fun getTotalDistanceKm() = dao.getTotalDistanceKm()
+
+    fun getTotalDurationSec() = dao.getTotalDurationSec()
 }
