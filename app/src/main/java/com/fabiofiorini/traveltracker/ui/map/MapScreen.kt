@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Stop
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.traveltracker.service.TrackingService
+import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Orange
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
@@ -33,6 +35,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 
+@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MapScreen(
@@ -79,9 +82,36 @@ fun MapScreen(
         if (elapsedSeconds > 0) (distanceMeters / 1000f) / (elapsedSeconds / 3600f)
         else 0f
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.NearMe,
+                            contentDescription = null,
+                            tint = Red
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Registra il percorso",
+                            color = Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Dark
+                )
+            )
+        },
+        containerColor = Dark
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
@@ -278,5 +308,6 @@ fun MapScreen(
                 }
             )
         }
+    }
     }
 }

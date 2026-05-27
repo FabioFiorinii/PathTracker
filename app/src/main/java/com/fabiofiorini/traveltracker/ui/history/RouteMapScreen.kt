@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.data.RoutePointEntity
+import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
@@ -30,6 +32,7 @@ import org.osmdroid.views.overlay.Polyline
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RouteMapScreen(
     routeId: Long,
@@ -53,9 +56,36 @@ fun RouteMapScreen(
 
     val geoPoints = routeDataPoints.map { GeoPoint(it.lat, it.lon) }
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.NearMe,
+                            contentDescription = null,
+                            tint = Red
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Percorso",
+                            color = Red,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Dark
+                )
+            )
+        },
+        containerColor = Dark
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { ctx ->
@@ -200,6 +230,7 @@ fun RouteMapScreen(
                 contentDescription = null
             )
         }
+    }
     }
 }
 

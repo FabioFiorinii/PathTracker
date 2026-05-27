@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -218,6 +219,12 @@ fun HistoryScreen(
                                             containerColor = Orange
                                         )
                                     ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Speed,
+                                            contentDescription = null,
+                                            tint = White
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
                                         Text("Info", color = White)
                                     }
 
