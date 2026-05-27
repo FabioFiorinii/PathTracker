@@ -1,5 +1,6 @@
 package com.fabiofiorini.traveltracker.ui.history
 
+import android.location.Location
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.traveltracker.data.RouteEntity
+import com.fabiofiorini.traveltracker.data.RoutePointEntity
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
@@ -33,8 +35,8 @@ fun RouteMapScreen(
     routeId: Long,
     onClose: () -> Unit
 ) {
-    var points by remember {
-        mutableStateOf<List<GeoPoint>>(emptyList())
+    var routeDataPoints by remember {
+        mutableStateOf<List<RoutePointEntity>>(emptyList())
     }
 
     var route by remember {
@@ -45,12 +47,11 @@ fun RouteMapScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val routePoints = viewModel.getPoints(routeId)
-        points = routePoints.map {
-            GeoPoint(it.lat, it.lon)
-        }
+        routeDataPoints = viewModel.getPoints(routeId)
         route = viewModel.getRoute(routeId)
     }
+
+    val geoPoints = routeDataPoints.map { GeoPoint(it.lat, it.lon) }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -62,52 +63,39 @@ fun RouteMapScreen(
                 map.setTileSource(TileSourceFactory.MAPNIK)
                 map.setMultiTouchControls(true)
                 map.controller.setZoom(16.0)
-
-                if (points.isNotEmpty()) {
-                    val polyline = Polyline()
-                    polyline.color = android.graphics.Color.RED
-                    polyline.width = 8f
-                    polyline.setPoints(points)
-                    map.overlays.add(polyline)
-
-                    val startMarker = Marker(map)
-                    startMarker.position = points.first()
-                    startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    startMarker.title = "Partenza"
-                    map.overlays.add(startMarker)
-
-                    val endMarker = Marker(map)
-                    endMarker.position = points.last()
-                    endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    endMarker.title = "Arrivo"
-                    map.overlays.add(endMarker)
-
-                    map.controller.setCenter(points.first())
-                }
                 map
             },
             update = { map ->
                 map.overlays.clear()
-                if (points.isNotEmpty()) {
-                    val polyline = Polyline()
-                    polyline.color = android.graphics.Color.RED
-                    polyline.width = 8f
-                    polyline.setPoints(points)
-                    map.overlays.add(polyline)
+                if (routeDataPoints.size >= 2) {
+                    val speeds = calculateSpeeds(routeDataPoints)
+                    val maxSpeed = speeds.maxOrNull() ?: 0f
+
+                    val first = geoPoints.first()
+                    val last = geoPoints.last()
+
+                    for (i in 0 until geoPoints.size - 1) {
+                        val ratio = if (maxSpeed > 0) (speeds[i] / maxSpeed).coerceIn(0f, 1f) else 0f
+                        val segment = Polyline()
+                        segment.outlinePaint.color = speedColor(ratio)
+                        segment.outlinePaint.strokeWidth = 8f
+                        segment.setPoints(listOf(geoPoints[i], geoPoints[i + 1]))
+                        map.overlays.add(segment)
+                    }
 
                     val startMarker = Marker(map)
-                    startMarker.position = points.first()
+                    startMarker.position = first
                     startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     startMarker.title = "Partenza"
                     map.overlays.add(startMarker)
 
                     val endMarker = Marker(map)
-                    endMarker.position = points.last()
+                    endMarker.position = last
                     endMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     endMarker.title = "Arrivo"
                     map.overlays.add(endMarker)
 
-                    map.controller.setCenter(points.first())
+                    map.controller.setCenter(first)
                 }
                 map.invalidate()
             }
@@ -211,6 +199,34 @@ fun RouteMapScreen(
                 imageVector = Icons.Default.Close,
                 contentDescription = null
             )
+        }
+    }
+}
+
+private fun calculateSpeeds(points: List<RoutePointEntity>): FloatArray {
+    if (points.size < 2) return FloatArray(0)
+    val speeds = FloatArray(points.size - 1)
+    for (i in 0 until points.size - 1) {
+        val p1 = points[i]
+        val p2 = points[i + 1]
+        val results = FloatArray(1)
+        Location.distanceBetween(p1.lat, p1.lon, p2.lat, p2.lon, results)
+        val distKm = results[0] / 1000f
+        val timeHours = (p2.timestamp - p1.timestamp) / 3600000f
+        speeds[i] = if (timeHours > 0) distKm / timeHours else 0f
+    }
+    return speeds
+}
+
+private fun speedColor(ratio: Float): Int {
+    return when {
+        ratio < 0.5f -> {
+            val r = (ratio / 0.5f * 255).toInt().coerceIn(0, 255)
+            android.graphics.Color.rgb(r, 255, 0)
+        }
+        else -> {
+            val g = ((1f - ratio) / 0.5f * 255).toInt().coerceIn(0, 255)
+            android.graphics.Color.rgb(255, g, 0)
         }
     }
 }

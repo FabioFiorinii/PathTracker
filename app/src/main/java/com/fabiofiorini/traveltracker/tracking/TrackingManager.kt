@@ -15,6 +15,8 @@ class TrackingManager {
 
     val points = mutableStateListOf<GeoPoint>()
 
+    val timestamps = mutableStateListOf<Long>()
+
     var elapsedSeconds = mutableLongStateOf(0L)
 
     var distanceMeters = mutableFloatStateOf(0f)
@@ -23,6 +25,7 @@ class TrackingManager {
 
     fun reset() {
         points.clear()
+        timestamps.clear()
         elapsedSeconds.longValue = 0L
         distanceMeters.floatValue = 0f
         isTracking.value = false

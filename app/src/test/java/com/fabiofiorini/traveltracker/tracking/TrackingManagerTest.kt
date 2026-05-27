@@ -24,6 +24,7 @@ class TrackingManagerTest {
     @Test
     fun `initial state is all zeros`() {
         assertTrue(manager.points.isEmpty())
+        assertTrue(manager.timestamps.isEmpty())
         assertEquals(0L, manager.elapsedSeconds.longValue)
         assertEquals(0f, manager.distanceMeters.floatValue)
         assertFalse(manager.isTracking.value)
@@ -32,6 +33,7 @@ class TrackingManagerTest {
     @Test
     fun `reset clears all state`() {
         manager.points.add(GeoPoint(45.0, 9.0))
+        manager.timestamps.add(1000L)
         manager.elapsedSeconds.longValue = 120L
         manager.distanceMeters.floatValue = 500f
         manager.isTracking.value = true
@@ -39,6 +41,7 @@ class TrackingManagerTest {
         manager.reset()
 
         assertTrue(manager.points.isEmpty())
+        assertTrue(manager.timestamps.isEmpty())
         assertEquals(0L, manager.elapsedSeconds.longValue)
         assertEquals(0f, manager.distanceMeters.floatValue)
         assertFalse(manager.isTracking.value)

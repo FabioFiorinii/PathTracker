@@ -49,6 +49,18 @@ class TrackingRepositoryTest {
 
             override suspend fun getPointsForRoute(routeId: Long): List<RoutePointEntity> =
                 savedPoints.filter { it.routeId == routeId }
+
+            override suspend fun getRouteById(routeId: Long): RouteEntity? =
+                savedRoutes.find { it.id == routeId }
+
+            override fun getRouteCount(): Flow<Int> =
+                MutableStateFlow(savedRoutes.size)
+
+            override fun getTotalDistanceKm(): Flow<Float> =
+                MutableStateFlow(savedRoutes.sumOf { it.distanceKm.toDouble() }.toFloat())
+
+            override fun getTotalDurationSec(): Flow<Long> =
+                MutableStateFlow(savedRoutes.sumOf { it.durationSec })
         }
     }
 

@@ -125,6 +125,7 @@ class TrackingService : Service() {
                 }
 
                 trackingManager.points.add(smoothPoint)
+                trackingManager.timestamps.add(System.currentTimeMillis())
 
                 if (lastLocation != null) {
                     trackingManager.distanceMeters.floatValue +=

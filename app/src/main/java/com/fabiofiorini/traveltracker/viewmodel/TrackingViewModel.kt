@@ -69,12 +69,12 @@ class TrackingViewModel @JvmOverloads constructor(
 
             val routeId = repo.saveRoute(route)
 
-            val points = trackingManager.points.map {
+            val points = trackingManager.points.mapIndexed { index, geoPoint ->
                 RoutePointEntity(
                     routeId = routeId,
-                    lat = it.latitude,
-                    lon = it.longitude,
-                    timestamp = System.currentTimeMillis()
+                    lat = geoPoint.latitude,
+                    lon = geoPoint.longitude,
+                    timestamp = trackingManager.timestamps.getOrElse(index) { System.currentTimeMillis() }
                 )
             }
 
