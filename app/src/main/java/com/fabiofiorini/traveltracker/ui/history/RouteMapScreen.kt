@@ -1,7 +1,6 @@
 package com.fabiofiorini.traveltracker.ui.history
 
 import android.location.Location
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,6 +22,7 @@ import com.fabiofiorini.traveltracker.data.RoutePointEntity
 import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
+import com.fabiofiorini.traveltracker.util.GpxExporter
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -159,11 +159,18 @@ fun RouteMapScreen(
                         )
                         IconButton(
                             onClick = {
-                                Toast.makeText(
-                                    context,
-                                    "Esportazione GPX disponibile in un aggiornamento futuro",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                val r = route ?: return@IconButton
+                                val result = GpxExporter.export(
+                                    context, r, routeDataPoints
+                                )
+                                val msg = if (result != null) {
+                                    "GPX salvato"
+                                } else {
+                                    "Errore salvataggio GPX"
+                                }
+                                android.widget.Toast
+                                    .makeText(context, msg, android.widget.Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         ) {
                             Icon(
