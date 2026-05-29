@@ -6,19 +6,14 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.NearMe
-import androidx.compose.material.icons.filled.Route
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.fabiofiorini.traveltracker.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -88,7 +83,7 @@ fun MapScreen(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Default.NearMe,
+                            painter = painterResource(R.drawable.ic_near_me),
                             contentDescription = null,
                             tint = Red
                         )
@@ -162,12 +157,12 @@ fun MapScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Default.Timer,
-                        contentDescription = null,
-                        tint = Red,
-                        modifier = Modifier.size(18.dp)
-                    )
+                        Icon(
+                            painter = painterResource(R.drawable.ic_schedule),
+                            contentDescription = null,
+                            tint = Red,
+                            modifier = Modifier.size(18.dp)
+                        )
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "%02d:%02d:%02d".format(
@@ -184,7 +179,7 @@ fun MapScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Default.Route,
+                        painter = painterResource(R.drawable.ic_map),
                         contentDescription = null,
                         tint = Orange,
                         modifier = Modifier.size(18.dp)
@@ -199,13 +194,6 @@ fun MapScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Default.Speed,
-                        contentDescription = null,
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
                     Text(
                         "%.1f km/h".format(avgSpeed),
                         color = White.copy(alpha = 0.8f)
@@ -227,7 +215,7 @@ fun MapScreen(
             containerColor = Orange,
             contentColor = White
         ) {
-            Icon(Icons.Default.MyLocation, null)
+            Icon(painterResource(R.drawable.ic_near_me), null)
         }
 
         BackHandler {
@@ -244,7 +232,7 @@ fun MapScreen(
             containerColor = Red,
             contentColor = White
         ) {
-            Icon(Icons.Default.Stop, contentDescription = null)
+            Icon(painterResource(R.drawable.ic_stop), contentDescription = null)
         }
 
         if (showDialog) {

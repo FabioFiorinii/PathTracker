@@ -1,17 +1,12 @@
 package com.fabiofiorini.traveltracker.data
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "route_points")
+@Entity(tableName = "route_points", primaryKeys = ["routeId", "orderIndex"])
 data class RoutePointEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
-
     val routeId: Long,
-
+    val orderIndex: Int,
     val lat: Double,
     val lon: Double,
-
-    val timestamp: Long
+    val timestampSec: Int
 )

@@ -5,12 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.NearMe
-import androidx.compose.material.icons.filled.Route
-import androidx.compose.material.icons.filled.SaveAlt
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.ui.res.painterResource
+import com.fabiofiorini.traveltracker.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -83,7 +78,7 @@ private fun HeroSection(alpha: Float) {
         modifier = Modifier.alpha(alpha)
     ) {
         Icon(
-            imageVector = Icons.Default.NearMe,
+            painter = painterResource(R.drawable.ic_near_me),
             contentDescription = null,
             modifier = Modifier.size(56.dp),
             tint = Red
@@ -165,9 +160,9 @@ private fun StatItem(value: String, label: String) {
 @Composable
 private fun FeaturePills(startAnimation: Boolean) {
     val pills = listOf(
-        PillData(icon = Icons.Default.Route, label = "GPS"),
-        PillData(icon = Icons.Default.Timer, label = "Statistiche"),
-        PillData(icon = Icons.Default.SaveAlt, label = "Salva")
+        PillData(iconRes = R.drawable.ic_map, label = "GPS"),
+        PillData(iconRes = R.drawable.ic_schedule, label = "Statistiche"),
+        PillData(iconRes = R.drawable.ic_save, label = "Salva")
     )
 
     val offsetY by animateFloatAsState(
@@ -201,7 +196,7 @@ private fun FeaturePills(startAnimation: Boolean) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = pill.icon,
+                        painter = painterResource(pill.iconRes),
                         contentDescription = null,
                         tint = Red,
                         modifier = Modifier.size(28.dp)
@@ -253,7 +248,7 @@ private fun CTASection(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = Orange)
         ) {
             Icon(
-                imageVector = Icons.Default.History,
+                painter = painterResource(R.drawable.ic_history),
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
@@ -267,4 +262,4 @@ private fun CTASection(
     }
 }
 
-private data class PillData(val icon: ImageVector, val label: String)
+private data class PillData(val iconRes: Int, val label: String)

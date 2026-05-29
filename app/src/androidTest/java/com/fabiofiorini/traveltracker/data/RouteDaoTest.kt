@@ -53,8 +53,8 @@ class RouteDaoTest {
         )
         dao.insertPoints(
             listOf(
-                RoutePointEntity(routeId = routeId, lat = 45.0, lon = 9.0, timestamp = 100L),
-                RoutePointEntity(routeId = routeId, lat = 45.1, lon = 9.1, timestamp = 200L)
+                RoutePointEntity(routeId = routeId, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 100),
+                RoutePointEntity(routeId = routeId, orderIndex = 1, lat = 45.1, lon = 9.1, timestampSec = 200)
             )
         )
 
@@ -69,7 +69,7 @@ class RouteDaoTest {
             RouteEntity(title = "R", distanceKm = 1f, durationSec = 100L, averageSpeedKmh = 36f, date = 3000L)
         )
         dao.insertPoints(
-            listOf(RoutePointEntity(routeId = routeId, lat = 45.0, lon = 9.0, timestamp = 100L))
+            listOf(RoutePointEntity(routeId = routeId, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 100))
         )
 
         dao.deletePointsByRoute(routeId)

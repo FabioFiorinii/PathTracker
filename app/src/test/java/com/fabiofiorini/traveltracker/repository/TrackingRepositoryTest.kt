@@ -29,8 +29,7 @@ class TrackingRepositoryTest {
             }
 
             override suspend fun insertPoints(points: List<RoutePointEntity>) {
-                var nextId = points.size + 1L
-                savedPoints.addAll(points.map { it.copy(id = nextId++) })
+                savedPoints.addAll(points)
             }
 
             override fun getAllRoutes(): Flow<List<RouteEntity>> = routesFlow
@@ -94,8 +93,8 @@ class TrackingRepositoryTest {
         ))
 
         val testPoints = listOf(
-            RoutePointEntity(routeId = routeId, lat = 45.0, lon = 9.0, timestamp = 100L),
-            RoutePointEntity(routeId = routeId, lat = 45.1, lon = 9.1, timestamp = 200L)
+            RoutePointEntity(routeId = routeId, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 100),
+            RoutePointEntity(routeId = routeId, orderIndex = 1, lat = 45.1, lon = 9.1, timestampSec = 200)
         )
         repo.savePoints(testPoints)
 
@@ -112,7 +111,7 @@ class TrackingRepositoryTest {
             title = "Da cancellare", distanceKm = 1f, durationSec = 100L, averageSpeedKmh = 10f, date = 3000L
         ))
         repo.savePoints(listOf(
-            RoutePointEntity(routeId = routeId, lat = 45.0, lon = 9.0, timestamp = 100L)
+            RoutePointEntity(routeId = routeId, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 100)
         ))
         assertEquals(1, repo.getPoints(routeId).size)
 

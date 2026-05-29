@@ -46,7 +46,7 @@ object GpxExporter {
             appendLine("    <trkseg>")
             for (pt in points) {
                 appendLine("      <trkpt lat=\"${pt.lat}\" lon=\"${pt.lon}\">")
-                appendLine("        <time>${dateFormat.format(Date(pt.timestamp))}</time>")
+                appendLine("        <time>${dateFormat.format(Date(pt.timestampSec * 1000L))}</time>")
                 appendLine("      </trkpt>")
             }
             appendLine("    </trkseg>")

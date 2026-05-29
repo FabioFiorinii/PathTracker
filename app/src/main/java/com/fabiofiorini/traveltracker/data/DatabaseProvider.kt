@@ -19,7 +19,6 @@ object DatabaseProvider {
                         AppDatabase::class.java,
                         "travel_db"
                     )
-                        .fallbackToDestructiveMigration(false)
                         .build()
                     INSTANCE = inst
                 }

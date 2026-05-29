@@ -12,7 +12,7 @@ object RouteStatsCalculator {
             val p1 = points[i]
             val p2 = points[i + 1]
             val distKm = haversineKm(p1.lat, p1.lon, p2.lat, p2.lon)
-            val timeHours = (p2.timestamp - p1.timestamp) / 3600000f
+            val timeHours = (p2.timestampSec - p1.timestampSec) / 3600f
             speeds[i] = if (timeHours > 0) (distKm / timeHours).toFloat() else 0f
         }
         return speeds

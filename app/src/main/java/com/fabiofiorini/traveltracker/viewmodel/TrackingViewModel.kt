@@ -9,6 +9,7 @@ import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.data.RoutePointEntity
 import com.fabiofiorini.traveltracker.repository.TrackingRepository
 import com.fabiofiorini.traveltracker.tracking.TrackingManager
+import com.fabiofiorini.traveltracker.util.RouteSimplifier
 import kotlinx.coroutines.launch
 
 class TrackingViewModel @JvmOverloads constructor(
@@ -73,12 +74,15 @@ class TrackingViewModel @JvmOverloads constructor(
 
                 val routeId = repo.saveRoute(route)
 
-                val points = snapshotPoints.mapIndexed { index, geoPoint ->
+                val keepIndices = RouteSimplifier.simplify(snapshotPoints)
+
+                val points = keepIndices.mapIndexed { orderIndex, originalIndex ->
                     RoutePointEntity(
                         routeId = routeId,
-                        lat = geoPoint.latitude,
-                        lon = geoPoint.longitude,
-                        timestamp = snapshotTimestamps.getOrElse(index) { System.currentTimeMillis() }
+                        orderIndex = orderIndex,
+                        lat = snapshotPoints[originalIndex].latitude,
+                        lon = snapshotPoints[originalIndex].longitude,
+                        timestampSec = (snapshotTimestamps.getOrElse(originalIndex) { System.currentTimeMillis() } / 1000).toInt()
                     )
                 }
 

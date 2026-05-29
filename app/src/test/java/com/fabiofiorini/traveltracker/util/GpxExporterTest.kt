@@ -23,8 +23,8 @@ class GpxExporterTest {
             averageSpeedKmh = 10f, date = 1000L
         )
         val points = listOf(
-            RoutePointEntity(routeId = 1, lat = 45.0, lon = 9.0, timestamp = 1000L),
-            RoutePointEntity(routeId = 1, lat = 45.1, lon = 9.1, timestamp = 2000L)
+            RoutePointEntity(routeId = 1, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 1),
+            RoutePointEntity(routeId = 1, orderIndex = 1, lat = 45.1, lon = 9.1, timestampSec = 2)
         )
 
         val result = GpxExporter.buildGpx(route, points)

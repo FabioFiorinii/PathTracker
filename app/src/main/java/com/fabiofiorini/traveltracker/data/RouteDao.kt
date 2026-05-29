@@ -18,7 +18,7 @@ interface RouteDao {
     @Query("SELECT * FROM routes ORDER BY date DESC")
     fun getAllRoutes(): Flow<List<RouteEntity>>
 
-    @Query("SELECT * FROM route_points WHERE routeId = :routeId ORDER BY timestamp ASC")
+    @Query("SELECT * FROM route_points WHERE routeId = :routeId ORDER BY orderIndex ASC")
     suspend fun getRoutePoints(routeId: Long): List<RoutePointEntity>
 
     @Transaction

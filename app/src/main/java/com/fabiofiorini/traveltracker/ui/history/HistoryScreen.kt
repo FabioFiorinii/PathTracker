@@ -7,10 +7,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Speed
+import androidx.compose.ui.res.painterResource
+import com.fabiofiorini.traveltracker.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,7 +70,7 @@ fun HistoryScreen(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Default.Route,
+                            painter = painterResource(R.drawable.ic_map),
                             contentDescription = null,
                             tint = Red
                         )
@@ -139,10 +139,10 @@ fun HistoryScreen(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            Icons.Default.Route,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
+                    Icon(
+                        painter = painterResource(R.drawable.ic_map),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
                             tint = Color.White.copy(alpha = 0.3f)
                         )
                         Spacer(Modifier.height(16.dp))
@@ -203,7 +203,7 @@ fun HistoryScreen(
                                         )
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Map,
+                                            painter = painterResource(R.drawable.ic_map),
                                             contentDescription = null,
                                             tint = White
                                         )
@@ -220,7 +220,7 @@ fun HistoryScreen(
                                         )
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Speed,
+                                            imageVector = Icons.Default.Info,
                                             contentDescription = null,
                                             tint = White
                                         )

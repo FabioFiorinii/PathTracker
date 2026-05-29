@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.ui.res.painterResource
+import com.fabiofiorini.traveltracker.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -62,7 +62,7 @@ fun RouteMapScreen(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            Icons.Default.NearMe,
+                            painter = painterResource(R.drawable.ic_near_me),
                             contentDescription = null,
                             tint = Red
                         )
@@ -174,7 +174,7 @@ fun RouteMapScreen(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Default.FileDownload,
+                                painter = painterResource(R.drawable.ic_download),
                                 contentDescription = "Scarica GPX",
                                 tint = Red
                             )

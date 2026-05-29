@@ -9,7 +9,7 @@ class RouteStatsCalculatorTest {
     @Test
     fun `calculateSpeeds returns empty for single point`() {
         val points = listOf(
-            RoutePointEntity(routeId = 1, lat = 45.0, lon = 9.0, timestamp = 1000L)
+            RoutePointEntity(routeId = 1, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 1)
         )
         val speeds = RouteStatsCalculator.calculateSpeeds(points)
         assertTrue(speeds.isEmpty())
@@ -18,8 +18,8 @@ class RouteStatsCalculatorTest {
     @Test
     fun `calculateSpeeds returns known speed`() {
         val points = listOf(
-            RoutePointEntity(routeId = 1, lat = 45.0, lon = 9.0, timestamp = 0L),
-            RoutePointEntity(routeId = 1, lat = 45.00899, lon = 9.0, timestamp = 3600000L)
+            RoutePointEntity(routeId = 1, orderIndex = 0, lat = 45.0, lon = 9.0, timestampSec = 0),
+            RoutePointEntity(routeId = 1, orderIndex = 1, lat = 45.00899, lon = 9.0, timestampSec = 3600)
         )
         val speeds = RouteStatsCalculator.calculateSpeeds(points)
         assertEquals(1, speeds.size)
