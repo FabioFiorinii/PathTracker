@@ -206,7 +206,8 @@ fun MapScreen(
             onClick = {
                 val point = routePoints.lastOrNull()
                 if (point != null) {
-                    mapView?.controller?.animateTo(point)
+                    mapView?.controller?.setCenter(point)
+                    mapView?.controller?.setZoom(18.0)
                 }
             },
             modifier = Modifier

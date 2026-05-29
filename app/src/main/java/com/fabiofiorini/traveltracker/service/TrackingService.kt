@@ -29,6 +29,12 @@ class TrackingService : Service() {
         private const val SMOOTHING_BUFFER = 5
         private const val JITTER_FILTER_M = 3f
         private const val NOTIFICATION_ID = 1
+        private const val LOCATION_INTERVAL_MS = 5000L
+        private const val LOCATION_MIN_INTERVAL_MS = 2000L
+        private const val LOCATION_MAX_DELAY_MS = 10000L
+        private const val MIN_DISTANCE_M = 5f
+        private const val TIMER_DELAY_ACTIVE_MS = 1000L
+        private const val TIMER_DELAY_IDLE_MS = 5000L
     }
 
     private lateinit var fusedClient: FusedLocationProviderClient
@@ -73,10 +79,11 @@ class TrackingService : Service() {
         timerJob = timerScope.launch {
 
             while (true) {
-                delay(1000)
-
                 if (tm.isTracking.value) {
+                    delay(TIMER_DELAY_ACTIVE_MS)
                     tm.elapsedSeconds.longValue++
+                } else {
+                    delay(TIMER_DELAY_IDLE_MS)
                 }
             }
         }
@@ -89,8 +96,12 @@ class TrackingService : Service() {
 
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            2000
-        ).build()
+            LOCATION_INTERVAL_MS
+        )
+            .setMinUpdateIntervalMillis(LOCATION_MIN_INTERVAL_MS)
+            .setMaxUpdateDelayMillis(LOCATION_MAX_DELAY_MS)
+            .setMinUpdateDistanceMeters(MIN_DISTANCE_M)
+            .build()
 
         callback = object : LocationCallback() {
 
