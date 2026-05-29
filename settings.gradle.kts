@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TravelTracker"
+rootProject.name = "PathTracker"
 include(":app")

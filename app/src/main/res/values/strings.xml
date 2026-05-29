@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TravelTracker</string>
+    <string name="app_name">PathTracker</string>
     <string name="app_subtitle">Traccia i tuoi percorsi outdoor con precisione GPS</string>
     <string name="feature_gps_title">Registrazione GPS</string>
     <string name="feature_gps_desc">Cattura ogni tuo spostamento con precisione in tempo reale</string>
