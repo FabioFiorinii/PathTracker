@@ -38,8 +38,8 @@ class TrackingRepositoryTest {
             override suspend fun getRoutePoints(routeId: Long): List<RoutePointEntity> =
                 savedPoints.filter { it.routeId == routeId }
 
-            override suspend fun deleteRoute(route: RouteEntity) {
-                savedRoutes.removeAll { it.id == route.id }
+            override suspend fun deleteRouteById(routeId: Long) {
+                savedRoutes.removeAll { it.id == routeId }
                 routesFlow.value = savedRoutes.toList()
             }
 

@@ -25,21 +25,26 @@ import org.osmdroid.util.GeoPoint
 
 class TrackingService : Service() {
 
+    companion object {
+        private const val SMOOTHING_BUFFER = 5
+        private const val JITTER_FILTER_M = 3f
+        private const val NOTIFICATION_ID = 1
+    }
+
     private lateinit var fusedClient: FusedLocationProviderClient
 
     private var lastLocation: Location? = null
 
     private val smoothPoints = mutableListOf<GeoPoint>()
 
-    private val timerScope = CoroutineScope(Dispatchers.Default)
+    private val timerScope = CoroutineScope(Dispatchers.Main)
 
     private var timerJob: Job? = null
 
     private lateinit var callback: LocationCallback
 
-    private val trackingManager: TrackingManager
+    private val trackingManager: TrackingManager?
         get() = TrackingManager.current
-            ?: error("TrackingManager non inizializzato")
 
     override fun onCreate() {
         super.onCreate()
@@ -49,14 +54,19 @@ class TrackingService : Service() {
 
         createNotificationChannel()
 
-        startForeground(1, createNotification())
+        startForeground(NOTIFICATION_ID, createNotification())
 
-        startTimer()
+        val tm = trackingManager
+        if (tm == null) {
+            stopSelf()
+            return
+        }
 
-        startTracking()
+        startTimer(tm)
+        startTracking(tm)
     }
 
-    private fun startTimer() {
+    private fun startTimer(tm: TrackingManager) {
 
         timerJob?.cancel()
 
@@ -65,17 +75,17 @@ class TrackingService : Service() {
             while (true) {
                 delay(1000)
 
-                if (trackingManager.isTracking.value) {
-                    trackingManager.elapsedSeconds.longValue++
+                if (tm.isTracking.value) {
+                    tm.elapsedSeconds.longValue++
                 }
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun startTracking() {
+    private fun startTracking(tm: TrackingManager) {
 
-        trackingManager.isTracking.value = true
+        tm.isTracking.value = true
 
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -95,7 +105,7 @@ class TrackingService : Service() {
 
                 smoothPoints.add(newPoint)
 
-                if (smoothPoints.size > 5) {
+                if (smoothPoints.size > SMOOTHING_BUFFER) {
                     smoothPoints.removeAt(0)
                 }
 
@@ -103,7 +113,7 @@ class TrackingService : Service() {
                 val avgLon = smoothPoints.map { it.longitude }.average()
                 val smoothPoint = GeoPoint(avgLat, avgLon)
 
-                val previousPoint = trackingManager.points.lastOrNull()
+                val previousPoint = tm.points.lastOrNull()
 
                 if (previousPoint != null) {
 
@@ -119,16 +129,16 @@ class TrackingService : Service() {
 
                     val distance = results[0]
 
-                    if (distance < 3f) {
+                    if (distance < JITTER_FILTER_M) {
                         return
                     }
                 }
 
-                trackingManager.points.add(smoothPoint)
-                trackingManager.timestamps.add(System.currentTimeMillis())
+                tm.points.add(smoothPoint)
+                tm.timestamps.add(System.currentTimeMillis())
 
                 if (lastLocation != null) {
-                    trackingManager.distanceMeters.floatValue +=
+                    tm.distanceMeters.floatValue +=
                         lastLocation!!.distanceTo(location)
                 }
 
@@ -184,7 +194,7 @@ class TrackingService : Service() {
 
         timerJob?.cancel()
 
-        trackingManager.isTracking.value = false
+        trackingManager?.isTracking?.value = false
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

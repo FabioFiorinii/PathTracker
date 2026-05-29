@@ -1,6 +1,5 @@
 package com.fabiofiorini.traveltracker.ui.history
 
-import android.location.Location
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,6 +22,7 @@ import com.fabiofiorini.traveltracker.ui.theme.Dark
 import com.fabiofiorini.traveltracker.ui.theme.Red
 import com.fabiofiorini.traveltracker.ui.theme.White
 import com.fabiofiorini.traveltracker.util.GpxExporter
+import com.fabiofiorini.traveltracker.util.RouteStatsCalculator
 import com.fabiofiorini.traveltracker.viewmodel.TrackingViewModel
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -98,7 +98,7 @@ fun RouteMapScreen(
             update = { map ->
                 map.overlays.clear()
                 if (routeDataPoints.size >= 2) {
-                    val speeds = calculateSpeeds(routeDataPoints)
+                    val speeds = RouteStatsCalculator.calculateSpeeds(routeDataPoints)
                     val maxSpeed = speeds.maxOrNull() ?: 0f
 
                     val first = geoPoints.first()
@@ -107,7 +107,7 @@ fun RouteMapScreen(
                     for (i in 0 until geoPoints.size - 1) {
                         val ratio = if (maxSpeed > 0) (speeds[i] / maxSpeed).coerceIn(0f, 1f) else 0f
                         val segment = Polyline()
-                        segment.outlinePaint.color = speedColor(ratio)
+                        segment.outlinePaint.color = RouteStatsCalculator.speedColor(ratio)
                         segment.outlinePaint.strokeWidth = 8f
                         segment.setPoints(listOf(geoPoints[i], geoPoints[i + 1]))
                         map.overlays.add(segment)
@@ -238,33 +238,5 @@ fun RouteMapScreen(
             )
         }
     }
-    }
-}
-
-private fun calculateSpeeds(points: List<RoutePointEntity>): FloatArray {
-    if (points.size < 2) return FloatArray(0)
-    val speeds = FloatArray(points.size - 1)
-    for (i in 0 until points.size - 1) {
-        val p1 = points[i]
-        val p2 = points[i + 1]
-        val results = FloatArray(1)
-        Location.distanceBetween(p1.lat, p1.lon, p2.lat, p2.lon, results)
-        val distKm = results[0] / 1000f
-        val timeHours = (p2.timestamp - p1.timestamp) / 3600000f
-        speeds[i] = if (timeHours > 0) distKm / timeHours else 0f
-    }
-    return speeds
-}
-
-private fun speedColor(ratio: Float): Int {
-    return when {
-        ratio < 0.5f -> {
-            val r = (ratio / 0.5f * 255).toInt().coerceIn(0, 255)
-            android.graphics.Color.rgb(r, 255, 0)
-        }
-        else -> {
-            val g = ((1f - ratio) / 0.5f * 255).toInt().coerceIn(0, 255)
-            android.graphics.Color.rgb(255, g, 0)
-        }
     }
 }

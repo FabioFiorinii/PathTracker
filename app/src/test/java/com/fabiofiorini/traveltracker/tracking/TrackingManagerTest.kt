@@ -1,7 +1,5 @@
 package com.fabiofiorini.traveltracker.tracking
 
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.Assert.*
 import org.osmdroid.util.GeoPoint
@@ -9,17 +7,6 @@ import org.osmdroid.util.GeoPoint
 class TrackingManagerTest {
 
     private val manager = TrackingManager()
-
-    @Before
-    fun setUp() {
-        TrackingManager.current = manager
-    }
-
-    @After
-    fun tearDown() {
-        manager.reset()
-        TrackingManager.current = null
-    }
 
     @Test
     fun `initial state is all zeros`() {
@@ -45,5 +32,10 @@ class TrackingManagerTest {
         assertEquals(0L, manager.elapsedSeconds.longValue)
         assertEquals(0f, manager.distanceMeters.floatValue)
         assertFalse(manager.isTracking.value)
+    }
+
+    @Test
+    fun `current is a singleton`() {
+        assertSame(TrackingManager.current, TrackingManager.current)
     }
 }

@@ -1,9 +1,9 @@
 package com.fabiofiorini.traveltracker.data
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -21,12 +21,12 @@ interface RouteDao {
     @Query("SELECT * FROM route_points WHERE routeId = :routeId ORDER BY timestamp ASC")
     suspend fun getRoutePoints(routeId: Long): List<RoutePointEntity>
 
-    @Delete
-    suspend fun deleteRoute(route: RouteEntity)
+    @Transaction
+    @Query("DELETE FROM routes WHERE id = :routeId")
+    suspend fun deleteRouteById(routeId: Long)
 
     @Query("DELETE FROM route_points WHERE routeId = :routeId")
     suspend fun deletePointsByRoute(routeId: Long)
-
 
     @Query("SELECT * FROM route_points WHERE routeId = :routeId")
     suspend fun getPointsForRoute(

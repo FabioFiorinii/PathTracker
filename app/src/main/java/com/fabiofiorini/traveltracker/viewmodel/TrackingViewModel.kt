@@ -13,14 +13,11 @@ import kotlinx.coroutines.launch
 
 class TrackingViewModel @JvmOverloads constructor(
     application: Application,
-    private val repository: TrackingRepository? = null
+    private val repository: TrackingRepository? = null,
+    val trackingManager: TrackingManager = TrackingManager.current
 ) : AndroidViewModel(application) {
 
     private val repo: TrackingRepository
-
-    val trackingManager = TrackingManager().also {
-        TrackingManager.current = it
-    }
 
     val routes: Flow<List<RouteEntity>>
 
@@ -54,42 +51,49 @@ class TrackingViewModel @JvmOverloads constructor(
 
         viewModelScope.launch {
 
+            val snapshotPoints = trackingManager.points.toList()
+            val snapshotTimestamps = trackingManager.timestamps.toList()
+            val snapshotElapsed = trackingManager.elapsedSeconds.longValue
+            val snapshotDistance = trackingManager.distanceMeters.floatValue
+
             val avgSpeed =
-                if (trackingManager.elapsedSeconds.longValue > 0)
-                    (trackingManager.distanceMeters.floatValue / 1000f) /
-                            (trackingManager.elapsedSeconds.longValue / 3600f)
+                if (snapshotElapsed > 0)
+                    (snapshotDistance / 1000f) /
+                            (snapshotElapsed / 3600f)
                 else 0f
-            val route = RouteEntity(
-                title = title,
-                date = System.currentTimeMillis(),
-                durationSec = trackingManager.elapsedSeconds.longValue,
-                distanceKm = trackingManager.distanceMeters.floatValue / 1000f,
-                averageSpeedKmh = avgSpeed
-            )
 
-            val routeId = repo.saveRoute(route)
-
-            val points = trackingManager.points.mapIndexed { index, geoPoint ->
-                RoutePointEntity(
-                    routeId = routeId,
-                    lat = geoPoint.latitude,
-                    lon = geoPoint.longitude,
-                    timestamp = trackingManager.timestamps.getOrElse(index) { System.currentTimeMillis() }
+            try {
+                val route = RouteEntity(
+                    title = title,
+                    date = System.currentTimeMillis(),
+                    durationSec = snapshotElapsed,
+                    distanceKm = snapshotDistance / 1000f,
+                    averageSpeedKmh = avgSpeed
                 )
+
+                val routeId = repo.saveRoute(route)
+
+                val points = snapshotPoints.mapIndexed { index, geoPoint ->
+                    RoutePointEntity(
+                        routeId = routeId,
+                        lat = geoPoint.latitude,
+                        lon = geoPoint.longitude,
+                        timestamp = snapshotTimestamps.getOrElse(index) { System.currentTimeMillis() }
+                    )
+                }
+
+                repo.savePoints(points)
+            } finally {
+                trackingManager.reset()
             }
-
-            repo.savePoints(points)
-
-            trackingManager.reset()
         }
     }
 
     fun deleteRoute(route: RouteEntity) {
 
         viewModelScope.launch {
-
             repo.deletePoints(route.id)
-            repo.deleteRoute(route)
+            repo.deleteRouteById(route.id)
         }
     }
 

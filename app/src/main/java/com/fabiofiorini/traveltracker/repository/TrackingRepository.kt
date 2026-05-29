@@ -20,8 +20,8 @@ class TrackingRepository(
         dao.insertPoints(points)
     }
 
-    suspend fun deleteRoute(route: RouteEntity) {
-        dao.deleteRoute(route)
+    suspend fun deleteRouteById(routeId: Long) {
+        dao.deleteRouteById(routeId)
     }
 
     suspend fun deletePoints(routeId: Long) {

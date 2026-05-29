@@ -27,7 +27,7 @@ object GpxExporter {
         }
     }
 
-    private fun buildGpx(
+    internal fun buildGpx(
         route: RouteEntity,
         points: List<RoutePointEntity>
     ): String? {
@@ -91,11 +91,11 @@ object GpxExporter {
         return file.absolutePath
     }
 
-    private fun sanitizeFileName(title: String): String {
+    internal fun sanitizeFileName(title: String): String {
         return title.replace(Regex("[\\\\/:*?\"<>|]"), "_").take(100)
     }
 
-    private fun escapeXml(s: String): String {
+    internal fun escapeXml(s: String): String {
         return s
             .replace("&", "&amp;")
             .replace("<", "&lt;")

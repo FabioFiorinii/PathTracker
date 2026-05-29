@@ -9,8 +9,7 @@ import org.osmdroid.util.GeoPoint
 class TrackingManager {
 
     companion object {
-        @Volatile
-        var current: TrackingManager? = null
+        val current: TrackingManager by lazy { TrackingManager() }
     }
 
     val points = mutableStateListOf<GeoPoint>()

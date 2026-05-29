@@ -3,6 +3,7 @@ package com.fabiofiorini.traveltracker.viewmodel
 import android.app.Application
 import com.fabiofiorini.traveltracker.data.RouteEntity
 import com.fabiofiorini.traveltracker.repository.TrackingRepository
+import com.fabiofiorini.traveltracker.tracking.TrackingManager
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -25,6 +26,7 @@ class TrackingViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val app = mockk<Application>(relaxed = true)
     private val repo = mockk<TrackingRepository>(relaxed = true)
+    private val tm = TrackingManager()
 
     @Before
     fun setUp() {
@@ -34,6 +36,7 @@ class TrackingViewModelTest {
 
     @After
     fun tearDown() {
+        tm.reset()
         unmockkAll()
     }
 
@@ -43,9 +46,9 @@ class TrackingViewModelTest {
         coEvery { repo.saveRoute(capture(routeSlot)) } returns 1L
         coEvery { repo.savePoints(any()) } returns Unit
 
-        val viewModel = TrackingViewModel(app, repo)
-        val tm = viewModel.trackingManager
+        val viewModel = TrackingViewModel(app, repo, tm)
         tm.points.add(GeoPoint(45.0, 9.0))
+        tm.timestamps.add(100L)
         tm.elapsedSeconds.longValue = 600L
         tm.distanceMeters.floatValue = 3000f
 
@@ -66,13 +69,13 @@ class TrackingViewModelTest {
 
     @Test
     fun `deleteRoute calls dao delete methods`() = runTest(testDispatcher) {
-        val viewModel = TrackingViewModel(app, repo)
+        val viewModel = TrackingViewModel(app, repo, tm)
         val route = RouteEntity(id = 5, title = "X", distanceKm = 1f, durationSec = 100L, averageSpeedKmh = 10f, date = 1000L)
 
         viewModel.deleteRoute(route)
         testDispatcher.scheduler.advanceUntilIdle()
 
         coVerify { repo.deletePoints(5L) }
-        coVerify { repo.deleteRoute(route) }
+        coVerify { repo.deleteRouteById(5L) }
     }
 }

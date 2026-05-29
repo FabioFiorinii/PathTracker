@@ -9,18 +9,22 @@ object DatabaseProvider {
     private var INSTANCE: AppDatabase? = null
 
     fun getDatabase(context: Context): AppDatabase {
-        return INSTANCE ?: synchronized(this) {
-
-            val instance = Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "travel_db"
-            )
-                .fallbackToDestructiveMigration(false)
-                .build()
-
-            INSTANCE = instance
-            instance
+        var inst = INSTANCE
+        if (inst == null) {
+            synchronized(this) {
+                inst = INSTANCE
+                if (inst == null) {
+                    inst = Room.databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        "travel_db"
+                    )
+                        .fallbackToDestructiveMigration(false)
+                        .build()
+                    INSTANCE = inst
+                }
+            }
         }
+        return inst!!
     }
 }
