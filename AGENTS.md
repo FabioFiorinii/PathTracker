@@ -13,7 +13,7 @@
 ## Architecture
 
 - **Single module** `:app`, package `com.fabiofiorini.pathtracker`
-- **Navigation Compose**: 4 routes — `"start"` (StartScreen), `"map"` (MapScreen), `"history"` (HistoryScreen), `"routeMap/{routeId}"` (RouteMapScreen)
+- **Navigation Compose**: 4 routes — `"start"` (StartScreen), `"map"` (MapScreen), `"history"` (HistoryScreen), `"routeMap/{routeId}"` (HistoryRouteMapScreen)
 - **State**: `TrackingManager` singleton (`tracking/`) holds mutable Compose state (`points`, `elapsedSeconds`, etc.). This is the global tracking state holder used directly by ViewModel and MapScreen.
 - **DI**: No framework. `DatabaseProvider` is a manual singleton for Room.
 - **ViewModel**: `TrackingViewModel(Application)` (AndroidViewModel), not `ViewModelProvider.Factory` based — use `viewModel()` directly in composables.

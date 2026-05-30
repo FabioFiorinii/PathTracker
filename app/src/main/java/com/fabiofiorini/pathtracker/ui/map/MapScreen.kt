@@ -241,7 +241,7 @@ fun MapScreen(
             containerColor = Red,
             contentColor = White
         ) {
-            Icon(painterResource(R.drawable.ic_stop), contentDescription = null)
+            Icon(painterResource(R.drawable.ic_save), contentDescription = null)
         }
 
         if (showDialog) {

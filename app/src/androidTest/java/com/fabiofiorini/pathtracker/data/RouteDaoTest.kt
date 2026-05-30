@@ -76,7 +76,7 @@ class RouteDaoTest {
         assertTrue(dao.getPointsForRoute(routeId).isEmpty())
 
         val route = dao.getAllRoutes().first().first()
-        dao.deleteRoute(route)
+        dao.deleteRouteById(route.id)
         assertTrue(dao.getAllRoutes().first().isEmpty())
     }
 }

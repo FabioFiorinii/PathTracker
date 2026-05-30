@@ -8,9 +8,9 @@ import androidx.annotation.RequiresApi
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.fabiofiorini.pathtracker.ui.history.HistoryRouteMapScreen
 import com.fabiofiorini.pathtracker.ui.map.MapScreen
 import com.fabiofiorini.pathtracker.ui.history.HistoryScreen
-import com.fabiofiorini.pathtracker.ui.history.RouteMapScreen
 import com.fabiofiorini.pathtracker.ui.start.StartScreen
 import com.fabiofiorini.pathtracker.ui.theme.PathTrackerTheme
 import org.osmdroid.config.Configuration
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
 
                         val routeId = it.arguments?.getLong("routeId") ?: 0L
 
-                        RouteMapScreen(
+                        HistoryRouteMapScreen(
                             routeId = routeId,
                             onClose = {
                                 navController.popBackStack()

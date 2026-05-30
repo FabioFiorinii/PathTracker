@@ -34,7 +34,7 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RouteMapScreen(
+fun HistoryRouteMapScreen(
     routeId: Long,
     onClose: () -> Unit
 ) {
