@@ -47,7 +47,7 @@ Per tutti i comandi di sviluppo, vedi [AGENTS.md](AGENTS.md).
 
 ## Screenshot
 
-<!-- Aggiungi qui gli screenshot dell'app -->
+Work in progress
 
 ## Licenza
 
