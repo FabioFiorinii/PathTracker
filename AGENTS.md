@@ -18,8 +18,8 @@
 - **DI**: No framework. `DatabaseProvider` is a manual singleton for Room.
 - **ViewModel**: `TrackingViewModel(Application)` (AndroidViewModel), not `ViewModelProvider.Factory` based — use `viewModel()` directly in composables.
 - **Maps**: osmdroid (not Google Maps). Must call `Configuration.getInstance().load()` before any MapView. Map screens set `userAgentValue` from package name.
-- **Database**: Room v2, tables `routes` and `route_points`, version 2, `exportSchema=false`. Run `kspKotlinDebug` if DAO/entity changes don't compile.
-- **Background GPS**: `TrackingService` is a foreground service with `foregroundServiceType="location"`. Started via `startForegroundService()`. Requests location every 2s (HIGH_ACCURACY). GPS smoothing: rolling average of 5 samples, 3m jitter filter.
+- **Database**: Room v2, tables `routes` and `route_points`, version 3 (migration v2→v3), `exportSchema=false`. Run `kspKotlinDebug` if DAO/entity changes don't compile.
+- **Background GPS**: `TrackingService` is a foreground service with `foregroundServiceType="location"`. Started via `startForegroundService()`. Requests location every 2s (PRIORITY_HIGH_ACCURACY, no distance filter). GPS smoothing: rolling average of 5 samples, 3m jitter filter.
 
 ## Key conventions
 
