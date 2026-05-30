@@ -4,14 +4,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.ui.res.painterResource
-import com.fabiofiorini.pathtracker.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.fabiofiorini.pathtracker.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -92,7 +92,7 @@ fun RouteMapScreen(
                 val map = MapView(ctx)
                 map.setTileSource(TileSourceFactory.MAPNIK)
                 map.setMultiTouchControls(true)
-                map.controller.setZoom(16.0)
+                map.controller.setZoom(18.0)
                 map
             },
             update = { map ->

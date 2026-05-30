@@ -106,6 +106,10 @@ class TrackingViewModel @JvmOverloads constructor(
         }
     }
 
+    fun exitWithoutSaving() {
+        trackingManager.reset()
+    }
+
     suspend fun getPoints(routeId: Long) =
         repo.getPoints(routeId)
 

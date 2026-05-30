@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.fabiofiorini.pathtracker.R
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +54,8 @@ fun MapScreen(
     var polyline by remember {
         mutableStateOf<Polyline?>(null)
     }
+
+    var mapCentered by remember { mutableStateOf(false) }
 
     val viewModel: TrackingViewModel = viewModel()
 
@@ -114,7 +118,7 @@ fun MapScreen(
                 map.onResume()
                 map.setTileSource(TileSourceFactory.MAPNIK)
                 map.setMultiTouchControls(true)
-                map.controller.setZoom(18.0)
+                map.controller.setZoom(19.0)
 
                 val m = Marker(map)
                 map.overlays.add(m)
@@ -132,6 +136,10 @@ fun MapScreen(
             update = { map ->
                 val lastPoint = routePoints.lastOrNull()
                 if (lastPoint != null) {
+                    if (!mapCentered) {
+                        map.controller.setCenter(lastPoint)
+                        mapCentered = true
+                    }
                     marker?.position = lastPoint
                     if (polyline?.getActualPoints()?.size != routePoints.size) {
                         polyline?.setPoints(routePoints)
@@ -207,7 +215,7 @@ fun MapScreen(
                 val point = routePoints.lastOrNull()
                 if (point != null) {
                     mapView?.controller?.setCenter(point)
-                    mapView?.controller?.setZoom(18.0)
+                    mapView?.controller?.setZoom(19.0)
                 }
             },
             modifier = Modifier
@@ -216,7 +224,7 @@ fun MapScreen(
             containerColor = Orange,
             contentColor = White
         ) {
-            Icon(painterResource(R.drawable.ic_near_me), null)
+            Icon(painterResource(R.drawable.ic_my_location), "Centra posizione")
         }
 
         BackHandler {
@@ -237,64 +245,83 @@ fun MapScreen(
         }
 
         if (showDialog) {
+            val canSave = routeTitle.isNotBlank()
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
                 },
                 containerColor = Color(0xFF2A2A2A),
                 title = {
-                    Text("Salva percorso", color = Red)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { showDialog = false }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = "Indietro",
+                                tint = White
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        Text("Salva percorso", color = Red)
+                    }
                 },
                 text = {
-                    OutlinedTextField(
-                        value = routeTitle,
-                        onValueChange = {
-                            routeTitle = it
-                        },
-                        label = {
-                            Text("Titolo")
-                        },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Red,
-                            unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                            focusedLabelColor = Red,
-                            unfocusedLabelColor = Color.White.copy(alpha = 0.5f),
-                            cursorColor = Red
-                        )
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            val intent = Intent(
-                                context,
-                                TrackingService::class.java
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = routeTitle,
+                            onValueChange = {
+                                routeTitle = it
+                            },
+                            label = {
+                                Text("Titolo *")
+                            },
+                            isError = routeTitle.isBlank(),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Red,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                                focusedLabelColor = Red,
+                                unfocusedLabelColor = Color.White.copy(alpha = 0.5f),
+                                cursorColor = Red
                             )
-                            context.stopService(intent)
-                            viewModel.saveCurrentRoute(routeTitle)
-                            showDialog = false
-                            onStop()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Red
                         )
-                    ) {
-                        Text("Salva", color = White)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    val intent = Intent(context, TrackingService::class.java)
+                                    context.stopService(intent)
+                                    viewModel.exitWithoutSaving()
+                                    showDialog = false
+                                    onStop()
+                                },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Red),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Esci senza salvare")
+                            }
+                            Button(
+                                onClick = {
+                                    val intent = Intent(context, TrackingService::class.java)
+                                    context.stopService(intent)
+                                    viewModel.saveCurrentRoute(routeTitle)
+                                    showDialog = false
+                                    onStop()
+                                },
+                                enabled = canSave,
+                                colors = ButtonDefaults.buttonColors(containerColor = Red),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Salva", color = White)
+                            }
+                        }
                     }
                 },
-                dismissButton = {
-                    OutlinedButton(
-                        onClick = {
-                            showDialog = false
-                        },
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = White
-                        )
-                    ) {
-                        Text("Annulla")
-                    }
-                }
+                confirmButton = {}
             )
         }
     }
