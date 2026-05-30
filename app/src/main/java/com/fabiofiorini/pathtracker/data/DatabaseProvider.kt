@@ -26,4 +26,13 @@ object DatabaseProvider {
         }
         return inst!!
     }
+
+    fun vacuum() {
+        try {
+            val db = INSTANCE?.openHelper?.writableDatabase ?: return
+            db.execSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+            db.execSQL("VACUUM")
+        } catch (_: Exception) {
+        }
+    }
 }

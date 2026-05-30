@@ -10,7 +10,9 @@ import com.fabiofiorini.pathtracker.data.RoutePointEntity
 import com.fabiofiorini.pathtracker.repository.TrackingRepository
 import com.fabiofiorini.pathtracker.tracking.TrackingManager
 import com.fabiofiorini.pathtracker.util.RouteSimplifier
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TrackingViewModel @JvmOverloads constructor(
     application: Application,
@@ -98,6 +100,9 @@ class TrackingViewModel @JvmOverloads constructor(
         viewModelScope.launch {
             repo.deletePoints(route.id)
             repo.deleteRouteById(route.id)
+            withContext(Dispatchers.IO) {
+                DatabaseProvider.vacuum()
+            }
         }
     }
 
