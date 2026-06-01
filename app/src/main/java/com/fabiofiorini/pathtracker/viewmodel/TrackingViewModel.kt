@@ -30,6 +30,8 @@ class TrackingViewModel @JvmOverloads constructor(
 
     val totalDurationSec: Flow<Long>
 
+    val totalSteps: Flow<Int>
+
     val routePoints = trackingManager.points
 
     val elapsedSeconds = trackingManager.elapsedSeconds
@@ -48,6 +50,7 @@ class TrackingViewModel @JvmOverloads constructor(
         routeCount = repo.getRouteCount()
         totalDistanceKm = repo.getTotalDistanceKm()
         totalDurationSec = repo.getTotalDurationSec()
+        totalSteps = repo.getTotalSteps()
     }
 
     fun saveCurrentRoute(title: String) {
@@ -58,6 +61,7 @@ class TrackingViewModel @JvmOverloads constructor(
             val snapshotTimestamps = trackingManager.timestamps.toList()
             val snapshotElapsed = trackingManager.elapsedSeconds.longValue
             val snapshotDistance = trackingManager.distanceMeters.floatValue
+            val snapshotSteps = trackingManager.steps.intValue
 
             val avgSpeed =
                 if (snapshotElapsed > 0)
@@ -71,7 +75,8 @@ class TrackingViewModel @JvmOverloads constructor(
                     date = System.currentTimeMillis(),
                     durationSec = snapshotElapsed,
                     distanceKm = snapshotDistance / 1000f,
-                    averageSpeedKmh = avgSpeed
+                    averageSpeedKmh = avgSpeed,
+                    steps = snapshotSteps
                 )
 
                 val routeId = repo.saveRoute(route)

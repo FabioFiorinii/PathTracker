@@ -12,5 +12,6 @@ data class RouteEntity(
     val distanceKm: Float,
     val durationSec: Long,
     val averageSpeedKmh: Float,
-    val date: Long
+    val date: Long,
+    val steps: Int = 0
 )

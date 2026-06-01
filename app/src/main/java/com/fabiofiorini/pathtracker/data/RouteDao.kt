@@ -44,4 +44,7 @@ interface RouteDao {
 
     @Query("SELECT COALESCE(SUM(durationSec), 0) FROM routes")
     fun getTotalDurationSec(): Flow<Long>
+
+    @Query("SELECT COALESCE(SUM(steps), 0) FROM routes")
+    fun getTotalSteps(): Flow<Int>
 }

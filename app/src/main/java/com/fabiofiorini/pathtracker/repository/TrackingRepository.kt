@@ -41,4 +41,6 @@ class TrackingRepository(
     fun getTotalDistanceKm() = dao.getTotalDistanceKm()
 
     fun getTotalDurationSec() = dao.getTotalDurationSec()
+
+    fun getTotalSteps() = dao.getTotalSteps()
 }

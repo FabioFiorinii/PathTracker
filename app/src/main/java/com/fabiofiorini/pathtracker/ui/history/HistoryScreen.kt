@@ -187,11 +187,20 @@ fun HistoryScreen(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    "%.2f km".format(route.distanceKm),
-                                    color = Red,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Text(
+                                        "%.2f km".format(route.distanceKm),
+                                        color = Red,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        "${route.steps} passi",
+                                        color = Orange,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -299,6 +308,10 @@ fun HistoryScreen(
                         Text(
                             "Velocità media: %.2f km/h"
                                 .format(route.averageSpeedKmh),
+                            color = White.copy(alpha = 0.8f)
+                        )
+                        Text(
+                            "Passi: ${route.steps}",
                             color = White.copy(alpha = 0.8f)
                         )
                     }

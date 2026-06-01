@@ -42,18 +42,29 @@ fun StartScreen(
     var startAnimation by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestMultiplePermissions()
     ) { }
 
     LaunchedEffect(Unit) {
         delay(100)
         startAnimation = true
 
+        val missing = mutableListOf<String>()
         if (ContextCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            missing.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (ContextCompat.checkSelfPermission(
+                context, Manifest.permission.ACTIVITY_RECOGNITION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            missing.add(Manifest.permission.ACTIVITY_RECOGNITION)
+        }
+
+        if (missing.isNotEmpty()) {
+            permissionLauncher.launch(missing.toTypedArray())
         }
     }
 
@@ -126,7 +137,7 @@ private fun HeroSection(alpha: Float) {
 private fun StatsBar(startAnimation: Boolean, viewModel: TrackingViewModel) {
     val routeCount by viewModel.routeCount.collectAsState(initial = 0)
     val totalKm by viewModel.totalDistanceKm.collectAsState(initial = 0f)
-    val totalSec by viewModel.totalDurationSec.collectAsState(initial = 0L)
+    val totalSteps by viewModel.totalSteps.collectAsState(initial = 0)
 
     val offsetY by animateFloatAsState(
         targetValue = if (startAnimation) 0f else 24f,
@@ -153,7 +164,7 @@ private fun StatsBar(startAnimation: Boolean, viewModel: TrackingViewModel) {
         ) {
             StatItem(value = "$routeCount", label = "Percorsi")
             StatItem(value = "%.1f".format(totalKm), label = "km")
-            StatItem(value = "${totalSec / 3600}", label = "ore")
+            StatItem(value = "$totalSteps", label = "passi")
         }
     }
 }

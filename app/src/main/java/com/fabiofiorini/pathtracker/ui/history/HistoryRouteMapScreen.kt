@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.pathtracker.data.RouteEntity
 import com.fabiofiorini.pathtracker.data.RoutePointEntity
 import com.fabiofiorini.pathtracker.ui.theme.Dark
+import com.fabiofiorini.pathtracker.ui.theme.Orange
 import com.fabiofiorini.pathtracker.ui.theme.Red
 import com.fabiofiorini.pathtracker.ui.theme.White
 import com.fabiofiorini.pathtracker.util.GpxExporter
@@ -209,8 +210,9 @@ fun HistoryRouteMapScreen(
                         )
                         Spacer(Modifier.width(16.dp))
                         Text(
-                            "%.1f km/h".format(r.averageSpeedKmh),
-                            color = White.copy(alpha = 0.7f)
+                            "${r.steps} passi",
+                            color = Orange,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 } ?: run {

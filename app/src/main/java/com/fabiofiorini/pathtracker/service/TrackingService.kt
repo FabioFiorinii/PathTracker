@@ -8,6 +8,10 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
@@ -37,6 +41,10 @@ class TrackingService : Service() {
 
     private lateinit var fusedClient: FusedLocationProviderClient
 
+    private lateinit var sensorManager: SensorManager
+
+    private var stepSensor: Sensor? = null
+
     private var lastLocation: Location? = null
 
     private val smoothPoints = mutableListOf<GeoPoint>()
@@ -50,11 +58,31 @@ class TrackingService : Service() {
     private val trackingManager: TrackingManager?
         get() = TrackingManager.current
 
+    private val stepListener = object : SensorEventListener {
+        private var baselineSet = false
+        private var baseline = 0
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event?.sensor?.type != Sensor.TYPE_STEP_COUNTER) return
+            val value = event.values[0].toInt()
+            if (!baselineSet) {
+                baseline = value
+                baselineSet = true
+            }
+            trackingManager?.steps?.intValue = value - baseline
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
     override fun onCreate() {
         super.onCreate()
 
         fusedClient =
             LocationServices.getFusedLocationProviderClient(this)
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
 
         createNotificationChannel()
 
@@ -68,6 +96,12 @@ class TrackingService : Service() {
 
         startTimer(tm)
         startTracking(tm)
+
+        stepSensor?.let {
+            sensorManager.registerListener(
+                stepListener, it, SensorManager.SENSOR_DELAY_UI
+            )
+        }
     }
 
     private fun startTimer(tm: TrackingManager) {
@@ -196,6 +230,8 @@ class TrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        sensorManager.unregisterListener(stepListener)
 
         fusedClient.removeLocationUpdates(callback)
 

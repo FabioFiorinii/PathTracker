@@ -65,6 +65,8 @@ fun MapScreen(
 
     val distanceMeters = viewModel.distanceMeters.floatValue
 
+    val steps = viewModel.trackingManager.steps.intValue
+
     LaunchedEffect(true) {
         Configuration.getInstance().userAgentValue =
             context.packageName
@@ -76,10 +78,6 @@ fun MapScreen(
 
         context.startForegroundService(intent)
     }
-
-    val avgSpeed =
-        if (elapsedSeconds > 0) (distanceMeters / 1000f) / (elapsedSeconds / 3600f)
-        else 0f
 
     Scaffold(
         topBar = {
@@ -202,9 +200,17 @@ fun MapScreen(
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_footsteps),
+                        contentDescription = null,
+                        tint = Orange,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
                     Text(
-                        "%.1f km/h".format(avgSpeed),
-                        color = White.copy(alpha = 0.8f)
+                        "$steps",
+                        color = Orange,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

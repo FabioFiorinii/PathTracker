@@ -1,6 +1,7 @@
 package com.fabiofiorini.pathtracker.tracking
 
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +23,14 @@ class TrackingManager {
 
     var isTracking = mutableStateOf(false)
 
+    var steps = mutableIntStateOf(0)
+
     fun reset() {
         points.clear()
         timestamps.clear()
         elapsedSeconds.longValue = 0L
         distanceMeters.floatValue = 0f
+        steps.intValue = 0
         isTracking.value = false
     }
 }
