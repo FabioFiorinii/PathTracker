@@ -1,6 +1,7 @@
 package com.fabiofiorini.pathtracker.data
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 
 object DatabaseProvider {
@@ -33,7 +34,8 @@ object DatabaseProvider {
             val db = INSTANCE?.openHelper?.writableDatabase ?: return
             db.execSQL("PRAGMA wal_checkpoint(TRUNCATE)")
             db.execSQL("VACUUM")
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e("DatabaseProvider", "Vacuum failed", e)
         }
     }
 }

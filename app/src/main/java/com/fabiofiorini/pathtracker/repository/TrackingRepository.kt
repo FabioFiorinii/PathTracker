@@ -8,6 +8,10 @@ class TrackingRepository(
     private val dao: RouteDao
 ) {
 
+    suspend fun saveRouteWithPoints(route: RouteEntity, points: (Long) -> List<RoutePointEntity>): Long {
+        return dao.insertRouteWithPoints(route, points)
+    }
+
     suspend fun saveRoute(
         route: RouteEntity
     ): Long {

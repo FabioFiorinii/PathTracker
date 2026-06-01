@@ -79,21 +79,18 @@ class TrackingViewModel @JvmOverloads constructor(
                     steps = snapshotSteps
                 )
 
-                val routeId = repo.saveRoute(route)
-
                 val keepIndices = RouteSimplifier.simplify(snapshotPoints)
-
-                val points = keepIndices.mapIndexed { orderIndex, originalIndex ->
-                    RoutePointEntity(
-                        routeId = routeId,
-                        orderIndex = orderIndex,
-                        lat = snapshotPoints[originalIndex].latitude,
-                        lon = snapshotPoints[originalIndex].longitude,
-                        timestampSec = (snapshotTimestamps.getOrElse(originalIndex) { System.currentTimeMillis() } / 1000).toInt()
-                    )
+                repo.saveRouteWithPoints(route) { routeId ->
+                    keepIndices.mapIndexed { orderIndex, originalIndex ->
+                        RoutePointEntity(
+                            routeId = routeId,
+                            orderIndex = orderIndex,
+                            lat = snapshotPoints[originalIndex].latitude,
+                            lon = snapshotPoints[originalIndex].longitude,
+                            timestampSec = (snapshotTimestamps.getOrElse(originalIndex) { System.currentTimeMillis() } / 1000).toInt()
+                        )
+                    }
                 }
-
-                repo.savePoints(points)
             } finally {
                 trackingManager.reset()
             }

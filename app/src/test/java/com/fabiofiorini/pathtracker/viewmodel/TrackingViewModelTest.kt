@@ -2,6 +2,7 @@ package com.fabiofiorini.pathtracker.viewmodel
 
 import android.app.Application
 import com.fabiofiorini.pathtracker.data.RouteEntity
+import com.fabiofiorini.pathtracker.data.RoutePointEntity
 import com.fabiofiorini.pathtracker.repository.TrackingRepository
 import com.fabiofiorini.pathtracker.tracking.TrackingManager
 import io.mockk.coEvery
@@ -43,8 +44,10 @@ class TrackingViewModelTest {
     @Test
     fun `saveCurrentRoute persists route and points then resets`() = runTest(testDispatcher) {
         val routeSlot = slot<RouteEntity>()
-        coEvery { repo.saveRoute(capture(routeSlot)) } returns 1L
-        coEvery { repo.savePoints(any()) } returns Unit
+        coEvery { repo.saveRouteWithPoints(capture(routeSlot), any()) } answers {
+            secondArg<(Long) -> List<RoutePointEntity>>().invoke(1L)
+            1L
+        }
 
         val viewModel = TrackingViewModel(app, repo, tm)
         tm.points.add(GeoPoint(45.0, 9.0))
@@ -60,8 +63,7 @@ class TrackingViewModelTest {
         assert(captured.distanceKm == 3f)
         assert(captured.durationSec == 600L)
 
-        coVerify { repo.saveRoute(any()) }
-        coVerify { repo.savePoints(any()) }
+        coVerify { repo.saveRouteWithPoints(any(), any()) }
 
         assert(tm.points.isEmpty())
         assert(tm.elapsedSeconds.longValue == 0L)

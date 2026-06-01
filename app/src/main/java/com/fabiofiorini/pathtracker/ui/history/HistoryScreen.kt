@@ -14,6 +14,8 @@ import androidx.compose.ui.res.painterResource
 import com.fabiofiorini.pathtracker.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -26,6 +28,7 @@ import com.fabiofiorini.pathtracker.data.RoutePointEntity
 import com.fabiofiorini.pathtracker.ui.theme.Dark
 import com.fabiofiorini.pathtracker.ui.theme.Orange
 import com.fabiofiorini.pathtracker.ui.theme.Red
+import com.fabiofiorini.pathtracker.ui.theme.SurfaceVariant
 import com.fabiofiorini.pathtracker.ui.theme.White
 import com.fabiofiorini.pathtracker.util.RouteStatsCalculator
 import com.fabiofiorini.pathtracker.viewmodel.TrackingViewModel
@@ -50,8 +53,8 @@ fun HistoryScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     var routePoints by remember { mutableStateOf(emptyList<RoutePointEntity>()) }
-    var movingTimeSec by remember { mutableStateOf(0L) }
-    var calories by remember { mutableStateOf(0) }
+    var movingTimeSec by remember { mutableLongStateOf(0L) }
+    var calories by remember { mutableIntStateOf(0) }
 
     val viewModel: TrackingViewModel = viewModel()
 
@@ -192,7 +195,7 @@ fun HistoryScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFF2A2A2A)
+                                containerColor = SurfaceVariant
                             ),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                         ) {
@@ -275,7 +278,7 @@ fun HistoryScreen(
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.ic_delete),
-                                            contentDescription = null,
+                                            contentDescription = "Elimina percorso",
                                             modifier = Modifier.scale(1.5f)
                                         )
                                     }
@@ -290,7 +293,7 @@ fun HistoryScreen(
         selectedRoute?.let { route ->
             ModalBottomSheet(
                 onDismissRequest = { selectedRoute = null },
-                containerColor = Color(0xFF2A2A2A)
+                containerColor = SurfaceVariant
             ) {
                 Column(
                     modifier = Modifier
@@ -492,7 +495,7 @@ fun HistoryScreen(
                 onDismissRequest = {
                     toDeleteRoute = null
                 },
-                containerColor = Color(0xFF2A2A2A),
+                containerColor = SurfaceVariant,
                 confirmButton = {
                     Button(
                         onClick = {

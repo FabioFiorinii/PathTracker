@@ -154,12 +154,10 @@ class TrackingService : Service() {
                 val avgLon = smoothPoints.map { it.longitude }.average()
                 val smoothPoint = GeoPoint(avgLat, avgLon)
 
-                val previousPoint = tm.points.lastOrNull()
-
+                    val previousPoint = tm.points.lastOrNull()
+                var segmentDistance = 0f
                 if (previousPoint != null) {
-
                     val results = FloatArray(1)
-
                     Location.distanceBetween(
                         previousPoint.latitude,
                         previousPoint.longitude,
@@ -167,23 +165,15 @@ class TrackingService : Service() {
                         smoothPoint.longitude,
                         results
                     )
-
-                    val distance = results[0]
-
-                    if (distance < JITTER_FILTER_M) {
+                    segmentDistance = results[0]
+                    if (segmentDistance < JITTER_FILTER_M) {
                         return
                     }
                 }
 
                 tm.points.add(smoothPoint)
                 tm.timestamps.add(System.currentTimeMillis())
-
-                if (lastLocation != null) {
-                    tm.distanceMeters.floatValue +=
-                        lastLocation!!.distanceTo(location)
-                }
-
-                lastLocation = location
+                tm.distanceMeters.floatValue += segmentDistance
             }
         }
         if (

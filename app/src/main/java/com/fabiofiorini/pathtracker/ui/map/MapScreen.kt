@@ -25,6 +25,7 @@ import com.fabiofiorini.pathtracker.service.TrackingService
 import com.fabiofiorini.pathtracker.ui.theme.Dark
 import com.fabiofiorini.pathtracker.ui.theme.Orange
 import com.fabiofiorini.pathtracker.ui.theme.Red
+import com.fabiofiorini.pathtracker.ui.theme.SurfaceVariant
 import com.fabiofiorini.pathtracker.ui.theme.White
 import com.fabiofiorini.pathtracker.viewmodel.TrackingViewModel
 import org.osmdroid.config.Configuration
@@ -155,7 +156,7 @@ fun MapScreen(
                 .padding(16.dp),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF2A2A2A)
+                containerColor = SurfaceVariant
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
@@ -249,7 +250,7 @@ fun MapScreen(
             containerColor = Red,
             contentColor = White
         ) {
-            Icon(painterResource(R.drawable.ic_save), contentDescription = null)
+            Icon(painterResource(R.drawable.ic_save), contentDescription = "Salva percorso")
         }
 
         if (showDialog) {
@@ -258,7 +259,7 @@ fun MapScreen(
                 onDismissRequest = {
                     showDialog = false
                 },
-                containerColor = Color(0xFF2A2A2A),
+                containerColor = SurfaceVariant,
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { showDialog = false }) {

@@ -1,12 +1,5 @@
 <resources>
     <string name="app_name">PathTracker</string>
-    <string name="app_subtitle">Traccia i tuoi percorsi outdoor con precisione GPS</string>
-    <string name="feature_gps_title">Registrazione GPS</string>
-    <string name="feature_gps_desc">Cattura ogni tuo spostamento con precisione in tempo reale</string>
-    <string name="feature_stats_title">Statistiche di viaggio</string>
-    <string name="feature_stats_desc">Visualizza distanza, durata e velocità media dei percorsi</string>
-    <string name="feature_save_title">Salva e condividi</string>
-    <string name="feature_save_desc">Archivia i percorsi completati e rivedili in qualsiasi momento</string>
     <string name="start_tracking">Registra nuovo percorso</string>
     <string name="view_history">Storico percorsi</string>
 </resources>

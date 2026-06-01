@@ -2,8 +2,10 @@ package com.fabiofiorini.pathtracker.ui.start
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -28,6 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fabiofiorini.pathtracker.ui.theme.Dark
 import com.fabiofiorini.pathtracker.ui.theme.Orange
 import com.fabiofiorini.pathtracker.ui.theme.Red
+import com.fabiofiorini.pathtracker.ui.theme.SurfaceVariant
 import com.fabiofiorini.pathtracker.ui.theme.White
 import com.fabiofiorini.pathtracker.viewmodel.TrackingViewModel
 import kotlinx.coroutines.delay
@@ -56,7 +59,8 @@ fun StartScreen(
         ) {
             missing.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
-        if (ContextCompat.checkSelfPermission(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(
                 context, Manifest.permission.ACTIVITY_RECOGNITION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -154,7 +158,7 @@ private fun StatsBar(startAnimation: Boolean, viewModel: TrackingViewModel) {
             .alpha(barAlpha)
             .offset(y = offsetY.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2A2A2A))
+        colors = CardDefaults.cardColors(containerColor = SurfaceVariant)
     ) {
         Row(
             modifier = Modifier
@@ -220,7 +224,7 @@ private fun FeaturePills(startAnimation: Boolean) {
                         .size(56.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(
-                            Color(0xFF2A2A2A)
+                            SurfaceVariant
                         ),
                     contentAlignment = Alignment.Center
                 ) {

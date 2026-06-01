@@ -15,6 +15,13 @@ interface RouteDao {
     @Insert
     suspend fun insertPoints(points: List<RoutePointEntity>)
 
+    @Transaction
+    suspend fun insertRouteWithPoints(route: RouteEntity, points: (Long) -> List<RoutePointEntity>): Long {
+        val routeId = insertRoute(route)
+        insertPoints(points(routeId))
+        return routeId
+    }
+
     @Query("SELECT * FROM routes ORDER BY date DESC")
     fun getAllRoutes(): Flow<List<RouteEntity>>
 

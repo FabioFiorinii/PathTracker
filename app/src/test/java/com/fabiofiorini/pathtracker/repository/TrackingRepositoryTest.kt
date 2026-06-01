@@ -60,6 +60,9 @@ class TrackingRepositoryTest {
 
             override fun getTotalDurationSec(): Flow<Long> =
                 MutableStateFlow(savedRoutes.sumOf { it.durationSec })
+
+            override fun getTotalSteps(): Flow<Int> =
+                MutableStateFlow(savedRoutes.sumOf { it.steps.toLong() }.toInt())
         }
     }
 

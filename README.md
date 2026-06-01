@@ -5,9 +5,12 @@ Traccia i tuoi percorsi outdoor con precisione GPS.
 ## Funzionalità
 
 - **Registrazione GPS** in tempo reale (2s, alta precisione) con smoothing e filtro jitter
-- **Statistiche** — distanza, durata, velocità media durante il percorso
-- **Mappa interattiva** con percorso colorato per velocità (verde → giallo → rosso)
+- **Contapassi** tramite sensore `TYPE_STEP_COUNTER` — delta rilevato ogni 2s, nessuna dipendenza esterna
+- **Statistiche** — distanza, durata, velocità media, passi durante il percorso
+- **Mappa interattiva** con percorso colorato per velocità (verde → giallo → rosso) e legenda
+- **Marker personalizzati** per posizione corrente, inizio e fine percorso
 - **Storico percorsi** con ricerca e dettaglio
+- **Finestra informativa** con `ModalBottomSheet`: header rosso, griglia di statistiche (passi, calorie stimate, tempo in movimento, andatura)
 - **Esportazione GPX** per condividere i tracciati
 - **Semplificazione Douglas-Peucker** (tolleranza 5 m) per risparmiare spazio
 
@@ -19,7 +22,7 @@ I file GPX vengono salvati nella cartella `Downloads/PathTracker/` (Android 10+)
 
 - **Kotlin** + Jetpack Compose + Material 3
 - **osmdroid** — mappe offline/online
-- **Room** — database locale  v3
+- **Room** — database locale v4 (`fallbackToDestructiveMigration()`)
 - **Google Play Services Location** — tracciamento GPS ad alta precisione
 - **KSP** — annotation processing per Room
 - **Coroutines + Flow** — reattività e concorrenza
@@ -59,3 +62,5 @@ MIT — vedi [LICENSE](LICENSE).
 - **Navigation Compose** — 4 route: start, map, history, route detail
 - **Manual DI** — `DatabaseProvider` singleton + `TrackingManager` singleton
 - **ViewModel** — `TrackingViewModel(Application)` con tracking state condiviso
+- **TrackingService** — foreground service con `foregroundServiceType="location"`, registra sensore `TYPE_STEP_COUNTER` per il conteggio passi
+- **Permessi runtime** — `ACCESS_FINE_LOCATION` e `ACTIVITY_RECOGNITION` richiesti via `RequestMultiplePermissions`

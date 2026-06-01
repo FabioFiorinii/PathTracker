@@ -26,6 +26,7 @@ import com.fabiofiorini.pathtracker.data.RoutePointEntity
 import com.fabiofiorini.pathtracker.ui.theme.Dark
 import com.fabiofiorini.pathtracker.ui.theme.Orange
 import com.fabiofiorini.pathtracker.ui.theme.Red
+import com.fabiofiorini.pathtracker.ui.theme.SurfaceVariant
 import com.fabiofiorini.pathtracker.ui.theme.White
 import com.fabiofiorini.pathtracker.util.GpxExporter
 import com.fabiofiorini.pathtracker.util.RouteStatsCalculator
@@ -179,7 +180,7 @@ fun HistoryRouteMapScreen(
             Card(
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF2A2A2A)
+                containerColor = SurfaceVariant
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
