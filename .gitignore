@@ -2,13 +2,13 @@
 .gradle
 /local.properties
 /.idea
-/.kotlin
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+/keystore.jks
 
 # Android Studio generated
 .idea/caches
