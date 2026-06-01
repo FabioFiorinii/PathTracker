@@ -208,12 +208,6 @@ fun HistoryRouteMapScreen(
                             ),
                             color = White.copy(alpha = 0.7f)
                         )
-                        Spacer(Modifier.width(16.dp))
-                        Text(
-                            "${r.steps} passi",
-                            color = Orange,
-                            fontWeight = FontWeight.SemiBold
-                        )
                     }
                 } ?: run {
                     Text(
