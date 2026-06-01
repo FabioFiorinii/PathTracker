@@ -2,6 +2,7 @@ package com.fabiofiorini.pathtracker.ui.map
 
 import android.content.Intent
 import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
@@ -119,6 +120,7 @@ fun MapScreen(
                 map.controller.setZoom(19.0)
 
                 val m = Marker(map)
+                m.setIcon(ContextCompat.getDrawable(ctx, R.drawable.ic_marker_current))
                 map.overlays.add(m)
 
                 val p = Polyline()
@@ -209,7 +211,7 @@ fun MapScreen(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "$steps",
-                        color = Orange,
+                        color = White.copy(alpha = 0.8f),
                         fontWeight = FontWeight.SemiBold
                     )
                 }
