@@ -25,6 +25,8 @@ class TrackingManager {
 
     var steps = mutableIntStateOf(0)
 
+    var locationEnabled = mutableStateOf(true)
+
     fun reset() {
         points.clear()
         timestamps.clear()
@@ -32,5 +34,6 @@ class TrackingManager {
         distanceMeters.floatValue = 0f
         steps.intValue = 0
         isTracking.value = false
+        locationEnabled.value = true
     }
 }

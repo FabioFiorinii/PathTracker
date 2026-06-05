@@ -1,6 +1,9 @@
 package com.fabiofiorini.pathtracker.ui.map
 
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.BackHandler
@@ -69,9 +72,14 @@ fun MapScreen(
 
     val steps = viewModel.trackingManager.steps.intValue
 
+    val locationEnabled = viewModel.trackingManager.locationEnabled.value
+
     LaunchedEffect(true) {
         Configuration.getInstance().userAgentValue =
             context.packageName
+
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        viewModel.trackingManager.locationEnabled.value = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
         val intent = Intent(
             context,
@@ -79,6 +87,17 @@ fun MapScreen(
         )
 
         context.startForegroundService(intent)
+    }
+
+    DisposableEffect(context) {
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(ctx: android.content.Context, intent: Intent) {
+                val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                viewModel.trackingManager.locationEnabled.value = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            }
+        }
+        context.registerReceiver(receiver, IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION))
+        onDispose { context.unregisterReceiver(receiver) }
     }
 
     Scaffold(
@@ -251,6 +270,44 @@ fun MapScreen(
             contentColor = White
         ) {
             Icon(painterResource(R.drawable.ic_save), contentDescription = "Salva percorso")
+        }
+
+        if (!locationEnabled) {
+            AlertDialog(
+                onDismissRequest = {
+                    viewModel.trackingManager.locationEnabled.value = false
+                },
+                containerColor = SurfaceVariant,
+                title = {
+                    Text("GPS disattivato", color = Red, fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Attiva la posizione GPS nelle impostazioni", color = White)
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            context.startActivity(Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Orange)
+                    ) {
+                        Text("Apri impostazioni", color = White)
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(context, TrackingService::class.java)
+                            context.stopService(intent)
+                            viewModel.exitWithoutSaving()
+                            onStop()
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Red)
+                    ) {
+                        Text("Annulla")
+                    }
+                }
+            )
         }
 
         if (showDialog) {

@@ -13,6 +13,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
@@ -121,10 +122,12 @@ class TrackingService : Service() {
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun startTracking(tm: TrackingManager) {
 
         tm.isTracking.value = true
+
+        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+        tm.locationEnabled.value = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
         val request = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
@@ -154,7 +157,7 @@ class TrackingService : Service() {
                 val avgLon = smoothPoints.map { it.longitude }.average()
                 val smoothPoint = GeoPoint(avgLat, avgLon)
 
-                    val previousPoint = tm.points.lastOrNull()
+                val previousPoint = tm.points.lastOrNull()
                 var segmentDistance = 0f
                 if (previousPoint != null) {
                     val results = FloatArray(1)
