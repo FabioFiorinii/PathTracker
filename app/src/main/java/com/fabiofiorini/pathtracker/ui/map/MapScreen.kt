@@ -91,7 +91,7 @@ fun MapScreen(
 
     DisposableEffect(context) {
         val receiver = object : android.content.BroadcastReceiver() {
-            override fun onReceive(ctx: android.content.Context, intent: Intent) {
+            override fun onReceive(ctx: Context, intent: Intent) {
                 val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
                 viewModel.trackingManager.locationEnabled.value = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
             }

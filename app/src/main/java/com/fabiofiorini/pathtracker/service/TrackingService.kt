@@ -1,7 +1,6 @@
 package com.fabiofiorini.pathtracker.service
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -45,8 +44,6 @@ class TrackingService : Service() {
     private lateinit var sensorManager: SensorManager
 
     private var stepSensor: Sensor? = null
-
-    private var lastLocation: Location? = null
 
     private val smoothPoints = mutableListOf<GeoPoint>()
 

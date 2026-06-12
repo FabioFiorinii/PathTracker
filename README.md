@@ -50,7 +50,9 @@ Per tutti i comandi di sviluppo, vedi [AGENTS.md](AGENTS.md).
 
 ## Screenshot
 
-Work in progress
+![Start](Start.jpeg) | ![Registrazione](Registrazione.jpeg) | ![Storico](Storico.jpeg)
+---|---|---
+![Info](Info.jpeg) | ![Elimina](Elimina.jpeg) | ![Mappa storica](Mappa%20storica.jpeg)
 
 ## Licenza
 
